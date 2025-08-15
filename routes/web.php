@@ -1,7 +1,14 @@
 <?php
 
+use App\Http\Controllers\AuditReportController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
+// Preview PDF in browser
+Route::get('/audit-report/preview', [AuditReportController::class, 'previewPdf'])->name('audit.report.preview');
+
+Route::get('/audit-report', [AuditReportController::class, 'showReport'])->name('audit.report');
+Route::get('/audit-report/pdf', [AuditReportController::class, 'downloadPdf'])->name('audit.report.pdf');
 
 Route::get('/', function () {
     return view('welcome');
