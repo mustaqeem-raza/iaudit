@@ -1,0 +1,151 @@
+question_id,topic,reference_code,heading_id,subheading_id,category_id,question_text,information_text
+1,IPM Docs,QTN - IPM Docs,1,1,1,Are all folders available for inspection?,Are the folders readily available and are they all together for easy Public Health Inspection?
+2,IPM Docs,QTN - IPM Docs,1,1,2,Are all folders available for inspection?,Are the folders readily available and are they all together for easy Public Health Inspection?
+3,IPM Docs,QTN - IPM Docs,1,2,3,Is the folder complete & available?,Is everything up to date at the time of the audit?
+4,IPM Docs,QTN - IPM Docs,1,2,4,The log inspection times accurate and not rounded.,"Log times should not be rounded to 10am or 11:30am, they should be accurate"
+5,IPM Docs,QTN - IPM Docs,1,2,5,The inspections contain reported pests and raising issues.,Are pests and issues being reported in the active inspection section?
+6,IPM Docs,QTN - IPM Docs,1,2,6,The inspection times accurate?,"Log times should not be rounded to 10am or 11:30am, they should be accurate"
+7,IPM Docs,QTN - IPM Docs,1,2,7,The inspection details free from generic keywords,"Generic words such as Bond, Fruit, dry etc should not be used. For example, you cannot inspect fruit, but you can inspect bananas or apples (i.e. specific items)"
+8,IPM Docs,QTN - IPM Docs,1,2,8,Are the inspection times accurate?,"Log times should not be rounded to 10am or 11:30am, they should be accurate"
+9,IPM Docs,QTN - IPM Docs,1,2,9,"All details accurately entered, and are treatments are followed up.",Are sufificent treatment details being entered in the treatmet sheet and are the follow up treatments being undertaken?
+10,IPM Docs,QTN - IPM Docs,1,3,10,The training is folder complete & available.,Is everything up to date at the time of the audit?
+11,IPM Docs,QTN - IPM Docs,1,4,11,The bedbug logs are complete & available.,Is everything up to date at the time of the audit?
+12,IPM Docs,QTN - IPM Docs,1,5,12,The management folder is complete & available.,Is everything up to date at the time of the audit?
+13,IPM Docs,QTN - IPM Docs,1,5,13,Are the Safety Data Sheets complete and available?,Is everything up to date at the time of the audit?
+14,IPM Docs,QTN - IPM Docs,1,6,14,The IPM Log folder is complete & available.,This is test information text
+15,IPM Docs,QTN - IPM Docs,1,6,15,The current IPM Log is complete & available.,This is test information text
+16,IPM Docs,QTN - IPM Docs,1,6,16,"The IPM Log is being maintained, and is it not post-dated.",This is test information text
+17,IPM Docs,QTN - IPM Docs,1,7,17,The IPM Plan folder is available & complete.,This is test information text
+18,IPM Docs,QTN - IPM Docs,1,7,18,Is the folder being maintained with no additional files or folders?,This is test information text
+19,IPM Docs,QTN - IPM Docs,1,8,19,Is the folder available for inspection?,This is test information text
+20,IPM Docs,QTN - IPM Docs,1,8,18,Is the folder being maintained with no additional files or folders?,This is test information text
+21,IPM Docs,QTN - IPM Docs,1,9,20,Are all advisories filed & available?,This is test information text
+22,IPM Docs,QTN - IPM Docs,1,9,21,Are all audit reports filed & available?,This is test information text
+23,IPM Docs,QTN - IPM Docs,1,9,22,Are log responses filed & available?,This is test information text
+24,PCL,QTN - PCL,2,10,23,Is there a designated pest locker only for pest control items?,Is there a designated pest locker only for pest control items?
+25,PCL,QTN - PCL,2,10,24,Is the pest locker not situated within a food storage or food production area?,Is the pest locker not situated within a food storage or food production area?
+26,PCL,QTN - PCL,2,10,25,Was the pest control locker secure and locked at the time of the audit?,Was the pest control locker secure and locked at the time of the audit?
+27,PCL,QTN - PCL,2,10,26,Is there restricted access to the pest control locker key?,Is there restricted access to the pest control locker key?
+28,PCL,QTN - PCL,2,11,27,Is the pest locker correctly signed as a pest control store?,Is the pest locker correctly signed as a pest control store?
+29,PCL,QTN - PCL,2,11,28,Is there a hazardous sign outside the pest control store?,Is there a hazardous sign outside the pest control store?
+30,PCL,QTN - PCL,2,11,29,Does the pest locker have a mixing area notice?,Does the pest locker have a mixing area notice?
+31,PCL,QTN - PCL,2,11,30,Is there a mixing sign in the designated mixing area?,Is there a mixing sign in the designated mixing area?
+32,PCL,QTN - PCL,2,11,31,Are chemical application notices ready and available?,Are chemical application notices ready and available?
+33,PCL,QTN - PCL,2,11,32,Is the Oa2ki Powder/ Diatomaceous Earth Fact Sheet displayed?,Is the Oa2ki Powder/ Diatomaceous Earth Fact Sheet displayed?
+34,PCL,QTN - PCL,2,11,33,Is the chemical/insect notice available?,Is the chemical/insect notice available?
+35,PCL,QTN - PCL,2,12,34,Are all available SDS sheets available inside or outside the pest control locker?,Are all available SDS sheets available inside or outside the pest control locker?
+36,PCL,QTN - PCL,2,12,35,Are all available SDS sheets available inside the hardcopy folder?,Are all available SDS sheets available inside the hardcopy folder?
+37,PCL,QTN - PCL,2,12,36,Are all available SDS sheets available inside the medical department?,Are all available SDS sheets available inside the medical department?
+38,PCL,QTN - PCL,2,13,37,Are the equipment levels being accurately detailed in the IPM log?,Are the equipment levels being accurately detailed in the IPM log?
+39,PCL,QTN - PCL,2,13,18,Is the large sprayer being correctly maintained?,Is the large sprayer being correctly maintained?
+40,PCL,QTN - PCL,2,13,38,Is there a yellow fan jet tip available to service the sprayer?,Is there a yellow fan jet tip available to service the sprayer?
+41,PCL,QTN - PCL,2,13,39,Is there a pre-filter for the lance-end available to service the sprayer?,Is there a pre-filter for the lance-end available to service the sprayer?
+42,PCL,QTN - PCL,2,13,40,Is there a seal kit available for the sprayer?,Is there a seal kit available for the sprayer?
+43,PCL,QTN - PCL,2,13,41,Is the sprayer empty?,Is the sprayer empty?
+44,PCL,QTN - PCL,2,13,42,Is the sprayer depressurised?,Is the sprayer depressurised?
+45,PCL,QTN - PCL,2,14,37,Are the equipment levels being accurately detailed in the IPM log?,Are the equipment levels being accurately detailed in the IPM log?
+46,PCL,QTN - PCL,2,14,43,Is the small sprayer being correctly maintained?,Is the small sprayer being correctly maintained?
+47,PCL,QTN - PCL,2,14,41,Is the sprayer empty?,Is the sprayer empty?
+48,PCL,QTN - PCL,2,14,42,Is the sprayer depressurised?,Is the sprayer depressurised?
+49,PCL,QTN - PCL,2,15,37,Are the equipment levels being accurately detailed in the IPM log?,Are the equipment levels being accurately detailed in the IPM log?
+50,PCL,QTN - PCL,2,15,43,Is the fogger being maintained?,Is the fogger being maintained?
+51,PCL,QTN - PCL,2,15,41,Is the fogger empty?,Is the fogger empty?
+52,PCL,QTN - PCL,2,15,44,Is the base connected?,Is the base connected?
+53,PCL,QTN - PCL,2,16,37,Are the equipment levels being accurately detailed in the IPM log?,Are the equipment levels being accurately detailed in the IPM log?
+54,PCL,QTN - PCL,2,16,43,Is the gel gun being maintained?,Is the gel gun being maintained?
+55,PCL,QTN - PCL,2,16,45,Are there sufficient replacement needles for the gel gun?,Are there sufficient replacement needles for the gel gun?
+56,PCL,QTN - PCL,2,17,18,Is the compression duster being well-maintained?,Is the compression duster being well-maintained?
+57,PCL,QTN - PCL,2,17,46,Is the compression duster dry?,Is the compression duster dry?
+58,PCL,QTN - PCL,2,18,18,Is the compression duster being well-maintained?,Is the compression duster being well-maintained?
+59,PCL,QTN - PCL,2,18,47,Is the storage cap on the duster?,Is the storage cap on the duster?
+60,PCL,QTN - PCL,2,19,37,Are adequate stock levels of personal protective equipment and filters available?,Are adequate stock levels of personal protective equipment and filters available?
+61,PCL,QTN - PCL,2,19,48,Is the PPE compliant with the Nutrastat IPM Plan?,Is the PPE compliant with the Nutrastat IPM Plan?
+62,PCL,QTN - PCL,2,19,18,Is PPE clean and well-maintained?,Is PPE clean and well-maintained?
+63,PCL,QTN - PCL,2,19,49,Is the PPE being stored separately from the chemicals?,Is the PPE being stored separately from the chemicals?
+64,PCL,QTN - PCL,2,20,50,Are adequate stock levels available?,Are adequate stock levels available?
+65,PCL,QTN - PCL,2,20,51,Are adequate stock levels available?,Are adequate stock levels available?
+66,PCL,QTN - PCL,2,20,52,"Is there a tube of rodent attractant in the pest locker, and is it in date?","Is there a tube of rodent attractant in the pest locker, and is it in date?"
+67,PCL,QTN - PCL,2,21,53,Are reasonable chemical stock levels being maintained as per the IPM Log?,Are reasonable chemical stock levels being maintained as per the IPM Log?
+68,PCL,QTN - PCL,2,21,48,Are there no differing chemicals compared with the IPM Plan?,Are there no differing chemicals compared with the IPM Plan?
+69,PCL,QTN - PCL,2,21,54,Are all chemicals up-to-date and not expired?,Are all chemicals up-to-date and not expired?
+70,PCL,QTN - PCL,2,21,55,Are there sufficient Electric Fly Killer Ultraviolet tubes for all fly killers?,Are there sufficient Electric Fly Killer Ultraviolet tubes for all fly killers?
+71,PCL,QTN - PCL,2,21,56,Are there sufficient Electric Fly Killer replacement glue boards for all fly killers?,Are there sufficient Electric Fly Killer replacement glue boards for all fly killers?
+72,PCL,QTN - PCL,2,21,57,Are most Silent Sentry boxes deployed around the departments?,Are most Silent Sentry boxes deployed around the departments?
+73,PCL,QTN - PCL,2,21,58,Are there sufficient standard cockroach traps?,Are there sufficient standard cockroach traps?
+74,PCL,QTN - PCL,2,21,59,Are there sufficient monitor cockroach traps?,Are there sufficient monitor cockroach traps?
+75,PCL,QTN - PCL,2,21,60,Are there sufficient bedbug traps?,Are there sufficient bedbug traps?
+76,PCL,QTN - PCL,2,22,61,"Is a portable, coloured container labelled ‘Poison’ available?","Is a portable, coloured container labelled ‘Poison’ available?"
+77,Pest Obs,QTN - Pest Obs,3,23,62,No cockroaches should be seen in this department.,No cockroaches should be seen in this department.
+78,Pest Obs,QTN - Pest Obs,3,23,63,No flying insects should be seen in this department.,No flying insects should be seen in this department.
+79,Pest Obs,QTN - Pest Obs,3,23,64,No bedbugs should be seen in this department.,No bedbugs should be seen in this department.
+80,Pest Obs,QTN - Pest Obs,3,23,65,No stored product insects should be seen in this department.,No stored product insects should be seen in this department.
+81,Pest Obs,QTN - Pest Obs,3,23,66,No rodents should be seen in this department.,No rodents should be seen in this department.
+82,Pest Obs,QTN - Pest Obs,3,23,67,No other pests should be seen in this department.,No other pests should be seen in this department.
+83,EFK,QTN - EFK,4,24,68,Are there sufficient fly killers in the area to prevent flying insect issues?  40/1/8.1.2.1,Are there sufficient fly killers in the area to prevent flying insect issues?  40/1/8.1.2.1
+84,EFK,QTN - EFK,4,25,69,There are no zapper-type fly killers installed on the ship. 40/1/8.1.2.1,There are no zapper-type fly killers installed on the ship. 40/1/8.1.2.1
+85,EFK,QTN - EFK,4,25,70,Are there no zapper-type fly killers installed in food areas? 40/1/8.1.2.1,Are there no zapper-type fly killers installed in food areas? 40/1/8.1.2.1
+86,EFK,QTN - EFK,4,25,71,Are all zappers acceptable? 40/1/8.1.2.1,Are all zappers acceptable? 40/1/8.1.2.1
+87,EFK,QTN - EFK,4,26,72,Are all fly killers always powered and working? 40/1/8.1.2.1,Are all fly killers always powered and working? 40/1/8.1.2.1
+88,EFK,QTN - EFK,4,26,73,Are all fly killers not working from the electric light switch circuit? 40/1/8.1.2.1,Are all fly killers not working from the electric light switch circuit? 40/1/8.1.2.1
+89,EFK,QTN - EFK,4,26,74,Are the wires powering the fly killer correctly installed and in conduit? 40/1/8.1.2.1,Are the wires powering the fly killer correctly installed and in conduit? 40/1/8.1.2.1
+90,EFK,QTN - EFK,4,27,75,Are the fly killers clean? 40/1/8.1.2.1,Are the fly killers clean? 40/1/8.1.2.1
+91,EFK,QTN - EFK,4,27,76,Are all fly killers in good condition and not damaged? 40/1/8.1.2.1,Are all fly killers in good condition and not damaged? 40/1/8.1.2.1
+92,EFK,QTN - EFK,4,27,77,Are there any missing parts on the fly killers? 40/1/8.1.2.1,Are there any missing parts on the fly killers? 40/1/8.1.2.1
+93,EFK,QTN - EFK,4,28,78,Are all UV tubes being changed as per the IPM Plan?,Are all UV tubes being changed as per the IPM Plan?
+94,EFK,QTN - EFK,4,28,79,Are all UV Tubes working when the power is on?,Are all UV Tubes working when the power is on?
+95,EFK,QTN - EFK,4,28,80,"Are the UV tubes shatter-resistant, covered in special plastic?","Are the UV tubes shatter-resistant, covered in special plastic?"
+96,EFK,QTN - EFK,4,28,81,Are the UV tubes installed such that they point out to maximise attraction?,Are the UV tubes installed such that they point out to maximise attraction?
+97,EFK,QTN - EFK,4,29,78,Are all the glue boards being changed as per the IPM Plan?,Are all the glue boards being changed as per the IPM Plan?
+98,EFK,QTN - EFK,4,29,69,Are the glue boards of the correct type for each fly killer?,Are the glue boards of the correct type for each fly killer?
+99,EFK,QTN - EFK,4,29,82,Is the next expiry date being written on the back of the glue boards?,Is the next expiry date being written on the back of the glue boards?
+100,EFK,QTN - EFK,4,29,83,Do all fly killers have glue boards installed?,Do all fly killers have glue boards installed?
+101,EFK,QTN - EFK,4,30,84,Are the maintenance labels in place on each fly killer?,Are the maintenance labels in place on each fly killer?
+102,EFK,QTN - EFK,4,30,85,Are the labels being completed as per the IPM Plan?,Are the labels being completed as per the IPM Plan?
+103,EFK,QTN - EFK,4,30,86,Are the maintenance labels correctly completed with no futuristic dates?,Are the maintenance labels correctly completed with no futuristic dates?
+104,EFK,QTN - EFK,4,31,87,Not located above food?,Not located above food?
+105,EFK,QTN - EFK,4,31,88,"Not located above clean equipment, utensils, serviettes, and single-use items?","Not located above clean equipment, utensils, serviettes, and single-use items?"
+106,EFK,QTN - EFK,4,31,89,Not located over food or clean surfaces within 150mm of either side of the fly killers?,Not located over food or clean surfaces within 150mm of either side of the fly killers?
+107,EFK,QTN - EFK,4,31,90,Are all fly killers in the correct siting location as required by Public Health?,Are all fly killers in the correct siting location as required by Public Health?
+108,RG,QTN - RG,5,32,91,Do all rat guards meet the minimum construction requirements?,This is test information text
+109,RG,QTN - RG,5,33,92,A minimum of one rat guard installed per line.,This is test information text
+110,RG,QTN - RG,5,34,93,All rat guards installed within an hour of arrival?,This is test information text
+111,RG,QTN - RG,5,34,94,Rat guards not removed earlier than an hour before departure.,This is test information text
+112,RG,QTN - RG,5,35,95,Rat guards placed with no gaps to allow rodent ingress.,This is test information text
+113,RG,QTN - RG,5,35,96,"Rat guards not placed within 2 metres of the dockside, considering personnel safety.",This is test information text
+114,RG,QTN - RG,5,35,97,Rat guards not placed at too shallow an angle.,This is test information text
+115,RG,QTN - RG,5,35,98,Rat guards securely tied and not hanging.,This is test information text
+116,RG,QTN - RG,5,35,99,Oriented rat guards not deployed in the correct direction.,This is test information text
+117,RG,QTN - RG,5,35,100,Rat guards not installed too low on the deck.,This is test information text
+118,RG,QTN - RG,5,35,101,Rat guards securing/safety lines installed at the back of the rat guard.,This is test information text
+119,RG,QTN - RG,5,36,102,Shipside rat guards weighted as per the IPM Plan.,This is test information text
+120,RG,QTN - RG,5,36,96,Shipside rat guards not placed too close to the ship.,This is test information text
+121,RG,QTN - RG,5,36,103,Shipside rat guards installed before the ship rope openings.,This is test information text
+122,CRT,QTN - CRT,6,37,104,The traps were assembled correctly.,The traps were assembled correctly.
+123,CRT,QTN - CRT,6,37,105,The ramps were not pulled out because they folded in.,The ramps were not pulled out because they folded in.
+124,CRT,QTN - CRT,6,37,24,The monitoring traps are correctly placed according to the IPM Log.,The monitoring traps are correctly placed according to the IPM Log.
+125,CRT,QTN - CRT,6,37,69,"The correct type of traps used (i.e. Silent Sentry, standard or monitor) as per the IPM Log.","The correct type of traps used (i.e. Silent Sentry, standard or monitor) as per the IPM Log."
+126,CRT,QTN - CRT,6,37,106,The silicon release paper on the traps was removed.,The silicon release paper on the traps was removed.
+127,CRT,QTN - CRT,6,37,107,"The traps are in good condition, not wet, not soiled, and not crushed.","The traps are in good condition, not wet, not soiled, and not crushed."
+128,CRT,QTN - CRT,6,37,108,The traps are correctly placed on the deck.,The traps are correctly placed on the deck.
+129,CRT,QTN - CRT,6,37,109,"The traps are being lifted before washdown, and they remain dry.","The traps are being lifted before washdown, and they remain dry."
+130,CRT,QTN - CRT,6,37,110,No traps were positioned vertically.,No traps were positioned vertically.
+131,CRT,QTN - CRT,6,37,88,"No traps were positioned inside equipment, such as the cleaning locker?","No traps were positioned inside equipment, such as the cleaning locker?"
+132,CRT,QTN - CRT,6,37,111,Using new ones all the time.,Using new ones all the time.
+133,CRT,QTN - CRT,6,37,112,"All traps are Nutrastat-branded, not any other types.","All traps are Nutrastat-branded, not any other types."
+134,CRT,QTN - CRT,6,38,84,The traps are correctly labelled.,The traps are correctly labelled.
+135,CRT,QTN - CRT,6,38,75,They are clean and well-maintained.,They are clean and well-maintained.
+136,CRT,QTN - CRT,6,38,76,They are all undamaged.,They are all undamaged.
+137,CRT,QTN - CRT,6,38,113,Standard monitoring traps are constantly being used in the Silent Sentry.,Standard monitoring traps are constantly being used in the Silent Sentry.
+138,CRT,QTN - CRT,6,38,114,The manufacturer’s plastic film wrap has been removed from all Silent Sentries.,The manufacturer’s plastic film wrap has been removed from all Silent Sentries.
+139,CRT,QTN - CRT,6,38,115,All internal base plates are correctly oriented.,All internal base plates are correctly oriented.
+140,CRT,QTN - CRT,6,38,116,There were no soiled or dusty traps.,There were no soiled or dusty traps.
+141,CRT,QTN - CRT,6,38,117,The baseplates were resting not on the hinge pins,The baseplates were resting not on the hinge pins
+142,CRT,QTN - CRT,6,39,118,Traps are inspected weekly as per the current IPM Log.,Traps are inspected weekly as per the current IPM Log.
+143,CRT,QTN - CRT,6,39,119,The traps all start at the correct IPM Period.,The traps all start at the correct IPM Period.
+144,CRT,QTN - CRT,6,39,120,The inspection dates correctly followed the IPM Log.,The inspection dates correctly followed the IPM Log.
+145,CRT,QTN - CRT,6,39,121,No traps were missing from the IPM Log designated locations.,No traps were missing from the IPM Log designated locations.
+146,CRT,QTN - CRT,6,39,122,The placement dates were correct.,The placement dates were correct.
+147,CRT,QTN - CRT,6,39,123,"The months are written in 3-character format (i.e. Apr, May, Dec).","The months are written in 3-character format (i.e. Apr, May, Dec)."
+148,CRT,QTN - CRT,6,39,124,The inspecting person’s initials/signature are applied.,The inspecting person’s initials/signature are applied.
+149,CRT,QTN - CRT,6,39,125,"Traps are inspected weekly and completed with Adults, Nymphs, and Other counts.","Traps are inspected weekly and completed with Adults, Nymphs, and Other counts."
+150,CRT,QTN - CRT,6,39,126,There were no post-dated traps.,There were no post-dated traps.

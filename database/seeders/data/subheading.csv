@@ -1,0 +1,40 @@
+subheading_id,heading_id,name
+1,1,Documentation Availability
+2,1,Hardcopy Folder: Completed Logs
+3,1,Hardcopy Folder: Training
+4,1,Hardcopy Folder: Bedbug Logs
+5,1,Hardcopy Folder: Management
+6,1,Electronic Folder: Current IPM Log
+7,1,Electronic Folder: IPM Plan
+8,1,Electronic Folder: Public Health
+9,1,Electronic Folder: IPM Management
+10,2,Locker
+11,2,Signage
+12,2,Safety Data Sheet Availability
+13,2,Large Sprayer
+14,2,Small Sprayer
+15,2,ULV Foggers
+16,2,Gel Gun
+17,2,Birchmeier DR5 Duster
+18,2,Electric Duster
+19,2,Personal Protective Equipment
+20,2,Rodent Traps and Attractant
+21,2,Stock Levels
+22,2,Chemical Transportation
+23,3,Department Pest Observations
+24,4,Fly Killer Quantity
+25,4,Zapper Fly Killers
+26,4,Power and Wiring
+27,4,Clean and Well Maintained
+28,4,UV Tube Maintenance
+29,4,Glue Board Maintenance
+30,4,Maintenance Labels
+31,4,Correct Location
+32,5,Construction
+33,5,Number Per Line
+34,5,Installation: Timing
+35,5,Installation: Dockside
+36,5,Installation: Shipside
+37,6,Standard and Monitor Traps
+38,6,Silent Sentries
+39,6,Inspections

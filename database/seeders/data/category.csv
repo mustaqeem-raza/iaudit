@@ -1,0 +1,127 @@
+category_id,name
+1,Hardcopy
+2,Electronic
+3,Completed Logs
+4,Active Ins. Time
+5,Active Ins. Pest
+6,Deliveries Time
+7,Deliveries Generic
+8,Treatment Time
+9,Treat. Follow Up
+10,Training
+11,Bedbug Logs
+12,Management
+13,MSDS
+14,Log Folder
+15,Current Log
+16,Log Maintained
+17,IPM Plan Folder
+18,Maintained
+19,Public Health
+20,Advisories
+21,Audit Reports
+22,Log Responses
+23,Specific
+24,Location
+25,Locked
+26,Access
+27,Outside
+28,Hazardous
+29,Mixing Notice
+30,Mixing Sign
+31,Restriction
+32,Oa2ki Fact
+33,Matrix
+34,Out/In Locker
+35,Hardcopy Folder
+36,Medical
+37,Levels
+38,Yellow Fan Jet
+39,Pre-Filter
+40,Seal Kit
+41,Empty
+42,Decompressed
+43,Maintenance
+44,Base
+45,Needles
+46,Wet
+47,Storage Cap
+48,Compliance
+49,Separate
+50,Levels: Rat
+51,Levels: Mouse
+52,Attractant
+53,Chemicals
+54,Expired
+55,UV Tubes
+56,Glue Boards
+57,Silent Sentry
+58,Standard Trap
+59,Monitor Trap
+60,Bedbug Trap
+61,Transportation
+62,Cockroaches
+63,Flying Insects
+64,Bedbugs
+65,Stored Product Insects
+66,Rodents
+67,Other pests
+68,Quantity
+69,Type
+70,Food Area
+71,Substitute
+72,Power
+73,Permanent
+74,Wiring
+75,Clean
+76,Damaged
+77,Missing Parts
+78,Changed
+79,Working
+80,Shatterproof
+81,LED Orientation
+82,Expiry Date
+83,Missing
+84,Labels
+85,Completed
+86,Future Dates
+87,Food
+88,Equipment
+89,Clean Surface
+90,Siting
+91,Construction
+92,Count
+93,Arrival
+94,Departure
+95,Gaps
+96,Distance
+97,Angled
+98,Hanging
+99,Orientation
+100,Ground Height
+101,Securing Line
+102,Weighted
+103,Openings
+104,Assembly
+105,Ramps
+106,Silicon Paper
+107,Condition
+108,Deck
+109,Washdown
+110,Vertical
+111,Reusing Traps
+112,Nutrastat Traps
+113,Trap Type
+114,Plastic Film
+115,Base Plate
+116,Soiled/Dusty
+117,Hinge Pins
+118,Weekly Inspect
+119,IPM Period Start
+120,Inspect Dates
+121,Missing Traps
+122,Placement Date
+123,Month 3-Chars
+124,Accountability
+125,Weekly Count
+126,Post-Dated

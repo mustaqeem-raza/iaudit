@@ -5,24 +5,24 @@
 SET NAMES utf8mb4;
 
 -- Drop in dependency order
-DROP TABLE IF EXISTS question_nc;
-DROP TABLE IF EXISTS question;
-DROP TABLE IF EXISTS criteria_table;
-DROP TABLE IF EXISTS text_block;
-DROP TABLE IF EXISTS template_reference;
-DROP TABLE IF EXISTS template;
-DROP TABLE IF EXISTS subheading;
-DROP TABLE IF EXISTS heading;
-DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS question_nc_iaudit;
+DROP TABLE IF EXISTS question_iaudit;
+DROP TABLE IF EXISTS criteria_table_iaudit;
+DROP TABLE IF EXISTS text_block_iaudit;
+DROP TABLE IF EXISTS template_reference_iaudit;
+DROP TABLE IF EXISTS template_iaudit;
+DROP TABLE IF EXISTS subheading_iaudit;
+DROP TABLE IF EXISTS heading_iaudit;
+DROP TABLE IF EXISTS category_iaudit;
 
 -- Lookups
-CREATE TABLE heading (
+CREATE TABLE heading_iaudit (
   heading_id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   UNIQUE KEY uq_heading_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE subheading (
+CREATE TABLE subheading_iaudit (
   subheading_id INT AUTO_INCREMENT PRIMARY KEY,
   heading_id INT NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -32,14 +32,14 @@ CREATE TABLE subheading (
     ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE category (
+CREATE TABLE category_iaudit (
   category_id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   UNIQUE KEY uq_category_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Templates
-CREATE TABLE template (
+CREATE TABLE template_iaudit (
   template_id INT AUTO_INCREMENT PRIMARY KEY,
   template_code VARCHAR(255) NOT NULL,
   report_title TEXT,
@@ -48,7 +48,7 @@ CREATE TABLE template (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Note: using template_code (varchar) as FK so it matches the exported CSV
-CREATE TABLE template_reference (
+CREATE TABLE template_reference_iaudit (
   template_ref_id INT AUTO_INCREMENT PRIMARY KEY,
   template_code VARCHAR(255) NOT NULL,
   reference_code VARCHAR(255) NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE template_reference (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Reusable text
-CREATE TABLE text_block (
+CREATE TABLE text_block_iaudit (
   text_block_id INT AUTO_INCREMENT PRIMARY KEY,
   reference_code VARCHAR(255) NOT NULL,
   main_heading VARCHAR(255) NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE text_block (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Criteria tables/questions
-CREATE TABLE criteria_table (
+CREATE TABLE criteria_table_iaudit (
   criteria_id INT AUTO_INCREMENT PRIMARY KEY,
   reference_code VARCHAR(255) NOT NULL,
   main_heading VARCHAR(255) NOT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE criteria_table (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Question bank (all QTN sheets)
-CREATE TABLE question (
+CREATE TABLE question_iaudit (
   question_id INT AUTO_INCREMENT PRIMARY KEY,
   topic ENUM('IPM Docs','PCL','Pest Obs','EFK','RG','CRT') NOT NULL,
   reference_code VARCHAR(255),
@@ -97,7 +97,7 @@ CREATE TABLE question (
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE question_nc (
+CREATE TABLE question_nc_iaudit (
   question_id INT PRIMARY KEY,
   nc_heading TEXT,
   nc_text TEXT,
