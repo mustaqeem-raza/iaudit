@@ -36,4 +36,11 @@ class QuestionIaudit extends Model
     {
         return $this->hasMany(QuestionNcIaudit::class, 'question_id', 'question_id');
     }
+
+    public function criteria()
+    {
+        return $this->hasMany(CriteriaIaudit::class, 'reference_id', 'reference_id');
+        // return $this->hasMany(CriteriaIaudit::class, 'question', 'question_id')
+        //     ->whereColumn('criteria.reference_id', 'question.reference_id');
+    }
 }

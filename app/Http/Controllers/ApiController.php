@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\DepartmentIaudit;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -71,5 +72,31 @@ class ApiController extends Controller
         });
 
         return response()->json($payload);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Logged out']);
+    }
+
+    public function departments()
+    {
+        $departments = DepartmentIaudit::query()
+            ->with([
+                'templates' => function ($t) {
+                    $t->with([
+                        'templateRef',
+                        'textBoxes',
+                        'questions' => function ($q) {
+                            $q->with(['category','heading','criteria']);
+                        },
+                    ]);
+                },
+            ])
+            ->get();
+
+        return response()->json($departments);
     }
 }

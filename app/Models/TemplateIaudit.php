@@ -17,8 +17,18 @@ class TemplateIaudit extends Model
         return $this->belongsTo(DepartmentIaudit::class, 'department_id', 'department_id');
     }
 
-    public function reference()
+    public function templateRef()
     {
         return $this->belongsTo(TemplateRefIaudit::class, 'reference_id', 'reference_id');
+    }
+
+    public function questions()
+    {
+        return $this->hasMany(QuestionIaudit::class, 'reference_id', 'reference_id');
+    }
+
+    public function textBoxes()
+    {
+        return $this->hasMany(TextBoxIaudit::class, 'reference_id', 'reference_id');
     }
 }
