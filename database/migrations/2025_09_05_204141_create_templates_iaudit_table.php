@@ -20,12 +20,15 @@ return new class extends Migration
 
             $table->foreign('department_id')
                 ->references('department_id')->on('departments_iaudit')
-                ->onUpdate('cascade')->onDelete('set null');
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
 
+            // FK — make sure parent column is indexed/unique/primary
             $table->foreign('reference_id')
                 ->references('reference_id')->on('template_refs_iaudit')
-                ->onUpdate('cascade')->onDelete('set null');
-        });
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
+            });
     }
 
     /**
