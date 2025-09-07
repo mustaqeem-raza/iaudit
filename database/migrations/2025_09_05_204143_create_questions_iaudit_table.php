@@ -37,6 +37,10 @@ return new class extends Migration
             $table->foreign('category_id')
                 ->references('category_id')->on('categories_iaudit')
                 ->onUpdate('cascade')->onDelete('set null');
+
+            $table->foreign('department_id')
+                ->references('department_id')->on('departments_iaudit')
+                ->cascadeOnUpdate()->nullOnDelete();
         });
     }
 
