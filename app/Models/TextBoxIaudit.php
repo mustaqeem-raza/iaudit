@@ -4,18 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TemplateIaudit extends Model
+class TextBoxIaudit extends Model
 {
-    protected $table = 'templates_iaudit';
-    protected $primaryKey = 'template_id';
+    protected $table = 'text_boxes_iaudit';
+    protected $primaryKey = 'text_box_id';
     public $timestamps = false;
     public $incrementing = false;
     protected $guarded = [];
-
-    public function department()
-    {
-        return $this->belongsTo(DepartmentIaudit::class, 'department_id', 'department_id');
-    }
 
     public function reference()
     {
