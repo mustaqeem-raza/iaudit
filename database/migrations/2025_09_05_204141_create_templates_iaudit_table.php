@@ -28,7 +28,7 @@ return new class extends Migration
                 ->references('reference_id')->on('template_refs_iaudit')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
-            });
+        });
     }
 
     /**
