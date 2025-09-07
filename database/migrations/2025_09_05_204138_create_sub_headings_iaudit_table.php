@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sub_categories_iaudit', function (Blueprint $table) {
+        Schema::create('sub_headings_iaudit', function (Blueprint $table) {
             $table->bigInteger('subheading_id')->primary();
             $table->bigInteger('heading_id'); // FK to headings_iaudit.heading_id
             $table->string('name')->nullable();
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sub_categories_iaudit');
+        Schema::dropIfExists('sub_headings_iaudit');
     }
 };

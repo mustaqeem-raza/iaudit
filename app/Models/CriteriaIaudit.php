@@ -8,6 +8,8 @@ class CriteriaIaudit extends Model
 {
     protected $table = 'criteria_iaudit';
     protected $primaryKey = 'criteria_id';
+    protected $fillable = ['reference_id','question','table_heading','main_heading'];
+
     public $timestamps = false;
     public $incrementing = false;
     protected $guarded = [];

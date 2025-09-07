@@ -14,7 +14,7 @@ class HeadingIaudit extends Model
 
     public function subCategories()
     {
-        return $this->hasMany(SubCategoryIaudit::class, 'heading_id', 'heading_id');
+        return $this->hasMany(SubHeadingIaudit::class, 'heading_id', 'heading_id');
     }
 
     public function questions()

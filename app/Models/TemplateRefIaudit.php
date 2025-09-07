@@ -8,6 +8,8 @@ class TemplateRefIaudit extends Model
 {
     protected $table = 'template_refs_iaudit';
     protected $primaryKey = 'reference_id';
+    protected $fillable = ['reference_code','reference_id','template_code'];
+    
     public $timestamps = false;
     public $incrementing = false;
     protected $guarded = [];

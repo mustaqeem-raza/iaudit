@@ -12,13 +12,13 @@ class WorkbookImport implements WithMultipleSheets
             'Department'     => new DepartmentImport(),
             'Category'       => new CategoryImport(),
             'Heading'        => new HeadingImport(),
-            'Sub_Category'    => new SubCategoryImport(),
-            'Template_Ref'    => new TemplateRefImport(),
+            'Sub_Heading'    => new SubHeadingImport(),
             'Template'       => new TemplateImport(),
+            'Template_Ref'   => new TemplateRefImport(),
             'Question'       => new QuestionImport(),
             'Question_NC'    => new QuestionNcImport(),
-            'Criteria'       => new CriteriaTableImport(),
-            'Text_Box'        => new TextBoxImport(),
+            'Criteria'       => new CriteriaImport(),
+            'Text_Box'       => new TextBoxImport(),
         ];
     }
 }

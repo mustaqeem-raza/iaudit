@@ -8,6 +8,8 @@ class TemplateIaudit extends Model
 {
     protected $table = 'templates_iaudit';
     protected $primaryKey = 'template_id';
+    protected $fillable = ['department_id','reference_id','report_title','template_code'];
+    
     public $timestamps = false;
     public $incrementing = false;
     protected $guarded = [];

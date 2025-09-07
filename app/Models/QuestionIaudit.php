@@ -8,6 +8,11 @@ class QuestionIaudit extends Model
 {
     protected $table = 'questions_iaudit';
     protected $primaryKey = 'question_id';
+    protected $fillable = [
+        'question_id','reference_id','heading_id','subheading_id',
+        'category_id','question_text','information_text'
+    ];
+    
     public $timestamps = false;
     public $incrementing = false;
     protected $guarded = [];
@@ -17,9 +22,9 @@ class QuestionIaudit extends Model
         return $this->belongsTo(HeadingIaudit::class, 'heading_id', 'heading_id');
     }
 
-    public function subCategory()
+    public function subHeading()
     {
-        return $this->belongsTo(SubCategoryIaudit::class, 'subheading_id', 'subheading_id');
+        return $this->belongsTo(SubHeadingIaudit::class, 'subheading_id', 'subheading_id');
     }
 
     public function category()

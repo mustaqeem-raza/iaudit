@@ -7,7 +7,7 @@ use App\Models\CriteriaTableIaudit;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class CriteriaTableImport implements ToModel, WithHeadingRow
+class CriteriaImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {

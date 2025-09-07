@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SubCategoryIaudit extends Model
+class SubHeadingIaudit extends Model
 {
-    protected $table = 'sub_categories_iaudit';
+    protected $table = 'sub_headings_iaudit';
     protected $primaryKey = 'subheading_id';
     public $timestamps = false;
     public $incrementing = false;
