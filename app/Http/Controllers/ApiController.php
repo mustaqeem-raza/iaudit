@@ -83,17 +83,11 @@ class ApiController extends Controller
 
     public function departments()
     {
-        $departments = DepartmentIaudit::query()
-            ->with([
-                'templates' => function ($t) {
-                    $t->with([
-                        'templateRef',
-                        'textBoxes',
-                        'questions',
-                    ]);
-                },
-            ])
-            ->get();
+        $departments = DepartmentIaudit::with([
+            'templates.questions.subHeading',
+            'templates.questions.heading'
+        ])->get();
+
         return response()->json($departments);
 
         // Pull everything we need in one go
