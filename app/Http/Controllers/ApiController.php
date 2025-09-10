@@ -91,7 +91,7 @@ class ApiController extends Controller
 
         // Transform hierarchy
         $result = $departments->map(function ($department) {
-            $headings = [];
+            $details = [];
 
             // Flatten questions across all templates in this department
             $questions = $department->templates->flatMap->questions;
@@ -123,13 +123,13 @@ class ApiController extends Controller
                     ];
                 }
 
-                $headings[] = $heading;
+                $details[] = $heading;
             }
 
             return [
                 'department_id' => $department->department_id,
                 'department_name' => $department->name,
-                'headings' => $headings
+                'details' => $details
             ];
         });
 
