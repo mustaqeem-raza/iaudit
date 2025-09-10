@@ -83,79 +83,56 @@ class ApiController extends Controller
 
     public function departments()
     {
+        // Load departments with templates and questions, including headings and subheadings
         $departments = DepartmentIaudit::with([
-            'templates.questions.subHeading',
-            'templates.questions.heading'
+            'templates.questions.heading',
+            'templates.questions.subHeading'
         ])->get();
 
-        return response()->json($departments);
+        // Transform hierarchy
+        $result = $departments->map(function ($department) {
+            $headings = [];
 
-        // Pull everything we need in one go
-        // $departments = DepartmentIaudit::query()
-        //     ->with([
-        //         'templates.questions' => function ($q) {
-        //             $q->select([
-        //                 'question_id',
-        //                 'reference_id',
-        //                 'category_id',
-        //                 'subheading_id',
-        //                 'question_text',
-        //                 'information_text',
-        //                 'heading_id'
-        //             ])->with([
-        //                 'category:category_id,name as category_name',
-        //                 'subHeading:subheading_id,subheading_name',
-        //             ]);
-        //         },
-        //     ])
-        //     ->get(['department_id', 'name as department_name']);
+            // Flatten questions across all templates in this department
+            $questions = $department->templates->flatMap->questions;
 
-        // // Transform into Department → Category → Subcategory → Questions
-        // $payload = $departments->map(function ($dept) {
-        //     // gather all questions for this department across all templates
-        //     $questions = $dept->templates->flatMap->questions;
+            // Group by heading
+            $questionsByHeading = $questions->groupBy(fn($q) => optional($q->heading)->heading_id);
 
-        //     // group by category, then subcategory
-        //     $categories = $questions
-        //         ->groupBy(fn($q) => optional($q->category)->category_id)
-        //         ->map(function ($catGroup) {
-        //             $category = optional($catGroup->first()->category);
+            foreach ($questionsByHeading as $headingId => $qs) {
+                $heading = [
+                    'heading_id' => $headingId,
+                    'heading_name' => optional($qs->first()->heading)->name,
+                    'subheadings' => []
+                ];
 
-        //             $subcategories = $catGroup
-        //                 ->groupBy(fn($q) => optional($q->subHeading)->subheading_id)
-        //                 ->map(function ($subGroup) {
-        //                     $sub = optional($subGroup->first()->subHeading);
+                // Group by subheading within this heading
+                $questionsBySub = $qs->groupBy(fn($q) => optional($q->subHeading)->subheading_id);
 
-        //                     return [
-        //                         'subheading_id'   => $sub->subheading_id ?? null,
-        //                         'subheading_name' => $sub->subheading_name ?? null,
-        //                         'questions'       => $subGroup->map(function ($q) {
-        //                             return [
-        //                                 'question_id'      => $q->question_id,
-        //                                 'question_text'    => $q->question_text,
-        //                                 'information_text' => $q->information_text,
-        //                                 // include if you want:
-        //                                 'heading_id'       => $q->heading_id,
-        //                                 'category_id'      => $q->category_id,
-        //                                 'subheading_id'    => $q->subheading_id,
-        //                             ];
-        //                         })->values(),
-        //                     ];
-        //                 })->values();
+                foreach ($questionsBySub as $subId => $subQs) {
+                    $heading['subheadings'][] = [
+                        'subheading_id' => $subId,
+                        'subheading_name' => optional($subQs->first()->subHeading)->name,
+                        'questions' => $subQs->map(function ($q) {
+                            return [
+                                'question_id' => $q->question_id,
+                                'question_text' => $q->question_text,
+                                'information_text' => $q->information_text
+                            ];
+                        })->values()
+                    ];
+                }
 
-        //             return [
-        //                 'category_id'   => $category->category_id ?? null,
-        //                 'category_name' => $category->category_name ?? 'Uncategorized',
-        //                 'subcategories' => $subcategories,
-        //             ];
-        //         })->values();
+                $headings[] = $heading;
+            }
 
-        //     return [
-        //         'department_id'   => $dept->department_id,
-        //         'department_name' => $dept->department_name,
-        //         'categories'      => $categories,
-        //     ];
-        // });
-        // return response()->json($payload);
+            return [
+                'department_id' => $department->department_id,
+                'department_name' => $department->name,
+                'headings' => $headings
+            ];
+        });
+
+        return response()->json($result);
     }
 }
