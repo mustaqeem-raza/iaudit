@@ -83,43 +83,57 @@ class ApiController extends Controller
 
     public function departments()
     {
-        // Load departments with templates and questions, including headings and subheadings
         $departments = DepartmentIaudit::with([
+            'templates.questions.category',
             'templates.questions.heading',
             'templates.questions.subHeading'
         ])->get();
 
-        // Transform hierarchy
         $result = $departments->map(function ($department) {
             $details = [];
 
             // Flatten questions across all templates in this department
             $questions = $department->templates->flatMap->questions;
 
-            // Group by heading
+            // Group by heading id (null-safe)
             $questionsByHeading = $questions->groupBy(fn($q) => optional($q->heading)->heading_id);
 
             foreach ($questionsByHeading as $headingId => $qs) {
                 $heading = [
-                    'heading_id' => $headingId,
+                    'heading_id'   => $headingId,
                     'heading_name' => optional($qs->first()->heading)->name,
-                    'subheadings' => []
+                    'subheadings'  => []
                 ];
 
-                // Group by subheading within this heading
+                // Group by subheading id within this heading (null-safe)
                 $questionsBySub = $qs->groupBy(fn($q) => optional($q->subHeading)->subheading_id);
 
                 foreach ($questionsBySub as $subId => $subQs) {
-                    $heading['subheadings'][] = [
-                        'subheading_id' => $subId,
-                        'subheading_name' => optional($subQs->first()->subHeading)->name,
-                        'questions' => $subQs->map(function ($q) {
+                    // Now group by category inside the subheading (null-safe)
+                    $questionsByCategory = $subQs->groupBy(fn($q) => optional($q->category)->category_id);
+
+                    $categories = $questionsByCategory->map(function ($categoryQs, $categoryId) {
+                        $categoryName = optional($categoryQs->first()->category)->name;
+
+                        $questionsArr = $categoryQs->map(function ($q) {
                             return [
-                                'question_id' => $q->question_id,
-                                'question_text' => $q->question_text,
-                                'information_text' => $q->information_text
+                                'question_id'      => $q->question_id,
+                                'question_text'    => $q->question_text,
+                                'information_text' => $q->information_text,
                             ];
-                        })->values()
+                        })->values();
+
+                        return [
+                            'category_id'   => $categoryId,
+                            'category_name' => $categoryName,
+                            'questions'     => $questionsArr,
+                        ];
+                    })->values();
+
+                    $heading['subheadings'][] = [
+                        'subheading_id'   => $subId,
+                        'subheading_name' => optional($subQs->first()->subHeading)->name,
+                        'category'      => $categories,
                     ];
                 }
 
@@ -127,11 +141,11 @@ class ApiController extends Controller
             }
 
             return [
-                'department_id' => $department->department_id,
+                'department_id'   => $department->department_id,
                 'department_name' => $department->name,
-                'details' => $details
+                'details'         => $details,
             ];
-        });
+        })->values();
 
         return response()->json($result);
     }
