@@ -55,7 +55,6 @@ class ApiController extends Controller
             }])
             ->select('id', 'name')
             ->orderBy('name')
-            ->limit(5)
             ->get();
 
         // Shape to: [{ name, fleets:[{ name, ships:[{name}]}]}]
