@@ -8,6 +8,8 @@ use App\Models\DepartmentIaudit;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
@@ -157,86 +159,84 @@ class ApiController extends Controller
 
     public function submitAudit(Request $request)
     {
-        dd($request->all());
         $user = $request->user();
         if (! $user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        // Validation rules
+        // Validate request
         $validated = $request->validate([
-            // We use authenticated user; optionally allow passing user_id if admin (not recommended)
-            //'user_id'     => ['sometimes','exists:users,id'],
             'ship_id'     => ['required', 'integer', 'exists:ships,id'],
-            'question_id' => ['required', 'integer', 'exists:questions,question_id'],
+            'question_id' => ['required', 'integer', 'exists:questions_iaudit,question_id'],
             'answer'      => ['required', Rule::in(['Yes', 'No', 'N/A'])],
             'note'        => ['nullable', 'string', 'max:2000'],
-
-            // files: optional array of files
-            'file'        => ['nullable', 'array'],
+            'file'        => ['nullable', 'array'], // must be an array if multiple
             'file.*'      => [
                 'file',
-                // 'max:10240', // max file size in KB (10MB). adjust if needed.
                 'mimes:jpg,jpeg,png,gif,svg,pdf,doc,docx,xlsx,xls,txt,mp4,mov,avi,mkv',
+                'max:10240',
             ],
         ]);
 
-        // Create DB record first to have an id for folder; we set user_id from authenticated user
-        $answer = AnswerIaudit::create([
-            'user_id'     => $user->id,
-            'ship_id'     => $validated['ship_id'],
-            'question_id' => $validated['question_id'],
-            'answer'      => $validated['answer'],
-            'note'        => $validated['note'] ?? null,
-            'files'       => null,
-        ]);
+        $savedFiles = [];
 
-        $storedFiles = [];
+        DB::beginTransaction();
+        try {
+            // Create answer first
+            $answer = AnswerIaudit::create([
+                'user_id'     => $user->id,
+                'ship_id'     => $validated['ship_id'],
+                'question_id' => $validated['question_id'],
+                'answer'      => $validated['answer'],
+                'note'        => $validated['note'] ?? null,
+                'files'       => null,
+            ]);
 
-        if ($request->hasFile('file')) {
-            // store each uploaded file under audits/{answer_id}/
-            foreach ($request->file('file') as $f) {
-                if (! $f->isValid()) {
-                    continue;
+            // Handle file uploads if provided
+            if ($request->hasFile('file')) {
+                foreach ($request->file('file') as $file) {
+                    if (! $file->isValid()) {
+                        Log::warning("Invalid file skipped for answer {$answer->id}");
+                        continue;
+                    }
+
+                    $path = $file->store("audits/{$answer->id}", 'public');
+
+                    $savedFiles[] = [
+                        'path'          => $path,
+                        'url'           => Storage::disk('public')->url($path),
+                        'original_name' => $file->getClientOriginalName(),
+                        'size'          => $file->getSize(),
+                        'mime'          => $file->getClientMimeType(),
+                    ];
                 }
 
-                $original = $f->getClientOriginalName();
-                $ext = $f->getClientOriginalExtension();
-                $filename = pathinfo($original, PATHINFO_FILENAME);
-                // create unique filename to avoid collisions
-                $storedName = Str::slug($filename) . '-' . time() . '-' . Str::random(6) . '.' . $ext;
-
-                // store on 'public' disk, under audits/{id}/
-                $path = $f->storeAs("audits/{$answer->id}", $storedName, 'public');
-
-                // optionally build full URL
-                $url = Storage::disk('public')->url($path);
-
-                $storedFiles[] = [
-                    'path' => $path, // storage path relative to storage/app/public
-                    'url'  => $url,
-                    'original_name' => $original,
-                    'size' => $f->getSize(),
-                    'mime' => $f->getClientMimeType(),
-                ];
+                if (! empty($savedFiles)) {
+                    $answer->update(['files' => $savedFiles]);
+                }
             }
 
-            // update DB with JSON array of uploaded file info
-            $answer->files = $storedFiles;
-            $answer->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Audit submit failed: ".$e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to submit audit. Please try again.',
+            ], 500);
         }
 
         return response()->json([
             'message' => 'Audit answer submitted successfully.',
             'data'    => [
-                'id' => $answer->id,
-                'user_id' => $answer->user_id,
-                'ship_id' => $answer->ship_id,
+                'id'          => $answer->id,
+                'user_id'     => $answer->user_id,
+                'ship_id'     => $answer->ship_id,
                 'question_id' => $answer->question_id,
-                'answer' => $answer->answer,
-                'note' => $answer->note,
-                'files' => $answer->files ?? [],
-                'created_at' => $answer->created_at,
+                'answer'      => $answer->answer,
+                'note'        => $answer->note,
+                'files'       => $answer->files ?? [],
+                'created_at'  => $answer->created_at,
             ],
         ], 201);
     }
