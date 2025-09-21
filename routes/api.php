@@ -8,12 +8,10 @@ Route::post('/login', [ApiController::class, 'login']);
 
 // Protected (requires Bearer token from /api/login)
 Route::middleware('auth:sanctum')->group(function () {
-    // logout by deleting current token
-    Route::post('/logout',  [ApiController::class, 'logout']);       // POST logout (delete token)
-    Route::get('/companies', [ApiController::class, 'companies']);          // GET company → fleet → ship
-    Route::get('/questions', [ApiController::class, 'questions']);          // GET all questions
-    Route::post('/answers', [ApiController::class, 'submitAudit']);
-    
-    Route::get('/audit-questions', [ApiController::class, 'auditQuestions']); // GET questions?ship_id=123
-    Route::post('/audits', [ApiController::class, 'storeAudit']);             // POST audit submit
+
+    Route::post('/logout',  [ApiController::class, 'logout']);       //auditQuestions POST logout (delete token)
+    Route::get('/companies', [ApiController::class, 'companies']);   // GET company → fleet → ship
+    Route::get('/questions', [ApiController::class, 'questions']);   // GET all questions
+    Route::post('/answers', [ApiController::class, 'submitAudit']);  // POST answers (submit audit)
+
 });

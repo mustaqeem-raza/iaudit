@@ -170,7 +170,7 @@ class ApiController extends Controller
             'question_id' => ['required', 'integer', 'exists:questions_iaudit,question_id'],
             'answer'      => ['required', Rule::in(['Yes', 'No', 'N/A'])],
             'note'        => ['nullable', 'string', 'max:2000'],
-            'file'        => ['nullable', 'array'], // must be an array if multiple
+            'file'        => ['nullable'], // single or multiple
             'file.*'      => [
                 'file',
                 'mimes:jpg,jpeg,png,gif,svg,pdf,doc,docx,xlsx,xls,txt,mp4,mov,avi,mkv',
@@ -182,7 +182,7 @@ class ApiController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create answer first
+            // Create answer
             $answer = AnswerIaudit::create([
                 'user_id'     => $user->id,
                 'ship_id'     => $validated['ship_id'],
@@ -192,9 +192,12 @@ class ApiController extends Controller
                 'files'       => null,
             ]);
 
-            // Handle file uploads if provided
-            if ($request->hasFile('file')) {
-                foreach ($request->file('file') as $file) {
+            // Normalize to array (handles both single & multiple files)
+            $files = $request->file('file');
+            if ($files) {
+                $files = is_array($files) ? $files : [$files];
+
+                foreach ($files as $file) {
                     if (! $file->isValid()) {
                         Log::warning("Invalid file skipped for answer {$answer->id}");
                         continue;
@@ -219,7 +222,7 @@ class ApiController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Audit submit failed: ".$e->getMessage());
+            Log::error("Audit submit failed: " . $e->getMessage());
 
             return response()->json([
                 'message' => 'Failed to submit audit. Please try again.',
