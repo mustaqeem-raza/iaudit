@@ -38,8 +38,10 @@ class ApiController extends Controller
             'token' => $token,
             'user'  => [
                 'id'    => $user->id,
-                'name'  => $user->first_name . ' ' . $user->last_name,
+                'first_name'  => $user->first_name,
+                'last_name'  => $user->last_name,
                 'email' => $user->email,
+                'title' => $user->title,
             ],
         ]);
     }
@@ -49,10 +51,10 @@ class ApiController extends Controller
         $companies = Company::query()
             ->whereHas('fleets.ships') // ensure relevant data exists
             ->with(['fleets' => function ($q) {
-                $q->select('id', 'name', 'cruise_company_id')
+                $q->select('id', 'name', 'mnemonic', 'cruise_company_id')
                     ->whereHas('ships') // only fleets that have ships
                     ->with(['ships' => function ($sq) {
-                        $sq->select('id', 'name', 'fleet_id')
+                        $sq->select('id', 'name', 'mnemonic', 'fleet_id')
                             ->orderBy('name');
                     }])
                     ->orderBy('name');
@@ -70,9 +72,11 @@ class ApiController extends Controller
                     return [
                         'id'    => $fleet->id,
                         'name'  => $fleet->name,
+                        'mnemonic' => $fleet->mnemonic,
                         'ships' => $fleet->ships->map(fn($ship) => [
                             'id'   => $ship->id,
                             'name' => $ship->name,
+                            'mnemonic' => $ship->mnemonic,
                         ])->values(),
                     ];
                 })->values(),
