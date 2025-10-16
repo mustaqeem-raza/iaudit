@@ -94,43 +94,59 @@ class ApiController extends Controller
 
     public function questions()
     {
-        $questions = DepartmentIaudit::with([
-            'templates.questions.category',
-            'templates.questions.heading',
-            'templates.questions.subHeading'
+        // === Eager load all relations to prevent N+1 queries ===
+        $departments = DepartmentIaudit::with([
+            'templates.questions' => function ($q) {
+                $q->with(['category', 'heading', 'subHeading', 'ncs']);
+            },
         ])->get();
 
-        $result = $questions->map(function ($department) {
+        // === Transform data ===
+        $result = $departments->map(function ($department) {
             $details = [];
 
-            // Flatten questions across all templates in this department
-            $questions = $department->templates->flatMap->questions;
+            // Flatten all questions from all templates for this department
+            $questions = $department->templates
+                ->flatMap(fn($template) => $template->questions)
+                ->filter();
 
-            // Group by heading id (null-safe)
+            if ($questions->isEmpty()) {
+                return [
+                    'department_id'   => $department->department_id,
+                    'department_name' => $department->name,
+                    'details'         => [],
+                ];
+            }
+
+            // Group questions by heading
             $questionsByHeading = $questions->groupBy(fn($q) => optional($q->heading)->heading_id);
 
             foreach ($questionsByHeading as $headingId => $qs) {
                 $heading = [
                     'heading_id'   => $headingId,
-                    'heading_name' => optional($qs->first()->heading)->name,
-                    'subheadings'  => []
+                    'heading_name' => optional($qs->first()->heading)->name ?? 'Untitled Heading',
+                    'subheadings'  => [],
                 ];
 
-                // Group by subheading id within this heading (null-safe)
+                // Group by subheading
                 $questionsBySub = $qs->groupBy(fn($q) => optional($q->subHeading)->subheading_id);
 
                 foreach ($questionsBySub as $subId => $subQs) {
-                    // Now group by category inside the subheading (null-safe)
+                    $subHeadingName = optional($subQs->first()->subHeading)->name ?? 'General';
+
+                    // Group by category
                     $questionsByCategory = $subQs->groupBy(fn($q) => optional($q->category)->category_id);
 
                     $categories = $questionsByCategory->map(function ($categoryQs, $categoryId) {
-                        $categoryName = optional($categoryQs->first()->category)->name;
+                        $categoryName = optional($categoryQs->first()->category)->name ?? 'Uncategorized';
 
+                        // Map questions with NCS data
                         $questionsArr = $categoryQs->map(function ($q) {
                             return [
-                                'question_id'      => $q->question_id,
-                                'question_text'    => $q->question_text,
-                                'information_text' => $q->information_text,
+                                'question_id'       => $q->question_id,
+                                'question_text'     => $q->question_text,
+                                'information_text'  => $q->information_text,
+                                'question_ncs'      => $q->ncs,
                             ];
                         })->values();
 
@@ -143,8 +159,8 @@ class ApiController extends Controller
 
                     $heading['subheadings'][] = [
                         'subheading_id'   => $subId,
-                        'subheading_name' => optional($subQs->first()->subHeading)->name,
-                        'category'      => $categories,
+                        'subheading_name' => $subHeadingName,
+                        'categories'      => $categories,
                     ];
                 }
 
@@ -158,7 +174,10 @@ class ApiController extends Controller
             ];
         })->values();
 
-        return response()->json($result);
+        return response()->json([
+            'success' => true,
+            'data'    => $result,
+        ]);
     }
 
     public function submitAudit(Request $request)
