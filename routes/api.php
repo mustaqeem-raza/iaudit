@@ -13,5 +13,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/companies', [ApiController::class, 'companies']);   // GET company → fleet → ship
     Route::get('/questions', [ApiController::class, 'questions']);   // GET all questions
     Route::post('/answers', [ApiController::class, 'submitAudit']);  // POST answers (submit audit)
+    Route::get('/trap-locations', [ApiController::class, 'trapLocations']);
 
 });

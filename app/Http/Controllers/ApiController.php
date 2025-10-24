@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnswerIaudit;
 use App\Models\Company;
+use App\Models\CrtTrapLocationIaudit;
 use App\Models\DepartmentIaudit;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -265,5 +266,63 @@ class ApiController extends Controller
                 'created_at'  => $answer->created_at,
             ],
         ], 201);
+    }
+
+    public function trapLocations()
+    {
+        $departments = CrtTrapLocationIaudit::select(
+            'department_id',
+            'department_name',
+            'deck',
+            'main_section',
+            'sub_section',
+            'trap_location',
+            'trap_type'
+        )->get()
+            ->groupBy('department_id');
+
+        $result = $departments->map(function ($deptRows, $deptId) {
+            $departmentName = optional($deptRows->first())->department_name;
+
+            // Group by deck
+            $decks = $deptRows->groupBy('deck')->map(function ($deckRows, $deckName) {
+                $mainSections = $deckRows->groupBy('main_section')->map(function ($mainRows, $mainName) {
+                    $subSections = $mainRows->groupBy('sub_section')->map(function ($subRows, $subName) {
+                        $traps = $subRows->map(function ($row) {
+                            return [
+                                'trap_location' => $row->trap_location,
+                                'trap_type'     => $row->trap_type,
+                            ];
+                        })->values();
+
+                        return [
+                            'sub_section'    => $subName,
+                            'trap_locations' => $traps,
+                        ];
+                    })->values();
+
+                    return [
+                        'main_section' => $mainName,
+                        'sub_sections' => $subSections,
+                    ];
+                })->values();
+
+                return [
+                    'deck'          => $deckName,
+                    'main_sections' => $mainSections,
+                ];
+            })->values();
+
+            return [
+                'department_id'   => $deptId,
+                'department_name' => $departmentName,
+                'details'         => $decks,
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $result,
+        ]);
     }
 }
