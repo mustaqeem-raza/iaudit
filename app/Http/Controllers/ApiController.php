@@ -6,6 +6,7 @@ use App\Models\AnswerIaudit;
 use App\Models\Company;
 use App\Models\CrtTrapLocationIaudit;
 use App\Models\DepartmentIaudit;
+use App\Models\EfkIAudit;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -310,6 +311,56 @@ class ApiController extends Controller
                 return [
                     'deck'          => $deckName,
                     'main_sections' => $mainSections,
+                ];
+            })->values();
+
+            return [
+                'department_id'   => $deptId,
+                'department_name' => $departmentName,
+                'details'         => $decks,
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $result,
+        ]);
+    }
+
+    public function efkLocations()
+    {
+        $departments = EfkIAudit::select(
+            'department_id',
+            'department_name',
+            'deck',
+            'area',
+            'location',
+            'type'
+        )->get()
+            ->groupBy('department_id');
+
+        $result = $departments->map(function ($deptRows, $deptId) {
+            $departmentName = optional($deptRows->first())->department_name;
+
+            // Group by deck
+            $decks = $deptRows->groupBy('deck')->map(function ($deckRows, $deckName) {
+                $areas = $deckRows->groupBy('area')->map(function ($areaRows, $areaName) {
+                    $locations = $areaRows->map(function ($row) {
+                        return [
+                            'location' => $row->location,
+                            'type'     => $row->type,
+                        ];
+                    })->values();
+
+                    return [
+                        'area'       => $areaName,
+                        'locations'  => $locations,
+                    ];
+                })->values();
+
+                return [
+                    'deck'  => $deckName,
+                    'areas' => $areas,
                 ];
             })->values();
 

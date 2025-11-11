@@ -16,13 +16,13 @@ class CrtTrapLocationImport implements ToModel, WithHeadingRow
         }
 
         return new CrtTrapLocationIaudit([
-            'department_id'   => $row['department_id'] ?? $row['Department_ID'] ?? null,
-            'department_name' => $row['department_name'] ?? $row['Department_Name'] ?? null,
-            'deck'            => $row['deck'] ?? $row['Deck'] ?? null,
-            'main_section'    => $row['main_section'] ?? $row['Main Section'] ?? null,
-            'sub_section'     => $row['sub_section'] ?? $row['Sub Section'] ?? null,
-            'trap_location'   => $row['trap_location'] ?? $row['Trap Location'] ?? null,
-            'trap_type'       => $row['trap_type'] ?? $row['Trap Type'] ?? null,
+            'department_id'   => $row['department_id'] ?? null,
+            'department_name' => $row['department_name'] ?? null,
+            'deck'            => $row['deck'] ?? null,
+            'main_section'    => $row['main_section'] ?? null,
+            'sub_section'     => $row['sub_section'] ?? null,
+            'trap_location'   => $row['trap_location'] ?? null,
+            'trap_type'       => $row['trap_type'] ?? null,
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Imports\CrtTrapLocationImport;
+use App\Models\CrtTrapLocationIaudit;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Maatwebsite\Excel\Facades\Excel;
@@ -19,6 +20,9 @@ class CrtTrapLocationSeeder extends Seeder
         }
 
         $this->command->info("Importing CRT_Trap_Location.xlsx ...");
+
+        CrtTrapLocationIaudit::truncate();
+
         Excel::import(new CrtTrapLocationImport, $path);
         $this->command->info("CRT_Trap_Location.xlsx import completed.");
     }
