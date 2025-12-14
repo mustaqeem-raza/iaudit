@@ -9,6 +9,7 @@ Route::get('/audit-report/preview', [AuditReportController::class, 'previewPdf']
 
 Route::get('/audit-report', [AuditReportController::class, 'showReport'])->name('audit.report');
 Route::get('/audit-report/pdf', [AuditReportController::class, 'downloadPdf'])->name('audit.report.pdf');
+Route::get('/audit-pdf-report', [AuditReportController::class, 'showPDFReport'])->name('audit.report');
 
 Route::get('/', function () {
     return view('welcome');

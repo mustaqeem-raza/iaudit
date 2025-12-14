@@ -25,6 +25,11 @@ class AuditReportController extends Controller
         // return view('audit-report-bootstrap', compact('data'));
     }
 
+    public function showPDFReport()
+    {
+        return view('audit-pdf-report');
+    }
+
     public function downloadPdf()
     {
         $data = [
