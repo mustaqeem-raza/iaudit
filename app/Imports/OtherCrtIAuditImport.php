@@ -3,12 +3,11 @@
 namespace App\Imports;
 
 use App\Models\OtherCrtIAudit;
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 
-class OtherCrtIAuditImport implements ToModel, WithHeadingRow
+class OtherCrtIAuditImport implements ToModel, WithHeadingRow, SkipsEmptyRows
 {
     public function model(array $row)
     {
