@@ -15,5 +15,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/answers', [ApiController::class, 'submitAudit']);  // POST answers (submit audit)
     Route::get('/trap-locations', [ApiController::class, 'trapLocations']);
     Route::get('/efk-locations', [ApiController::class, 'efkLocations']);
-
+    Route::get('/other-crt-locations', [ApiController::class, 'otherCrtLocations']);
 });

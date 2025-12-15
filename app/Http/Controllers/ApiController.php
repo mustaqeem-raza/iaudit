@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\CrtTrapLocationIaudit;
 use App\Models\DepartmentIaudit;
 use App\Models\EfkIAudit;
+use App\Models\OtherCrtIAudit;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -368,6 +369,60 @@ class ApiController extends Controller
                 'department_id'   => $deptId,
                 'department_name' => $departmentName,
                 'details'         => $decks,
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $result,
+        ]);
+    }
+
+    public function otherCrtLocations()
+    {
+        $rows = OtherCrtIAudit::select(
+            'other_crt_ref',
+            'other_crt_main_heading',
+            'other_crt_category',
+            'other_crt_sub_category',
+            'other_crt_type',
+            'other_crt_type_mnemonic',
+            'other_crt_non_compliance_text',
+            'other_crt_i_info'
+        )->orderBy('other_crt_ordinal')->get()
+            ->groupBy('other_crt_main_heading');
+
+        $result = $rows->map(function ($mainRows, $mainHeading) {
+
+            $categories = $mainRows->groupBy('other_crt_category')->map(function ($catRows, $category) {
+
+                $subCategories = $catRows->groupBy('other_crt_sub_category')->map(function ($subRows, $subCategory) {
+
+                    $items = $subRows->map(function ($row) {
+                        return [
+                            'type'                 => $row->other_crt_type,
+                            'type_mnemonic'        => $row->other_crt_type_mnemonic,
+                            'non_compliance_text' => $row->other_crt_non_compliance_text,
+                            'i_info'              => $row->other_crt_i_info,
+                        ];
+                    })->values();
+
+                    return [
+                        'sub_category' => $subCategory,
+                        'items'        => $items,
+                    ];
+                })->values();
+
+                return [
+                    'category'      => $category,
+                    'sub_categories' => $subCategories,
+                ];
+            })->values();
+
+            return [
+                'ref'          => optional($mainRows->first())->other_crt_ref,
+                'main_heading' => $mainHeading,
+                'details'      => $categories,
             ];
         })->values();
 
