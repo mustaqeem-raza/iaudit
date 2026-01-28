@@ -1,0 +1,825 @@
+:root {
+    --page-w: 1241;
+    --page-h: 1755;
+    --teal: #035b60;
+    --teal-dark: #01484d;
+    --red: #d92626;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #e9eef0;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.stage {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.page {
+    position: relative;
+    width: min(1241px, 96vw);
+    aspect-ratio: calc(var(--page-w) / var(--page-h));
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .18);
+}
+
+.header {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: auto;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+}
+
+.footer-wedge {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 35.8%;
+    height: auto;
+    user-select: none;
+    pointer-events: none;
+}
+
+.stamp {
+    position: absolute;
+    top: 10.1%;
+    left: 48.7%;
+    transform: translateX(-50%) rotate(-1.2deg);
+    color: var(--red);
+    border: max(3px, 0.55vw) solid var(--red);
+    padding: 12px 22px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 0.95;
+    font-size: clamp(22px, 3.2vw, 56px);
+    border-radius: 10px;
+    opacity: 0.92;
+    mix-blend-mode: multiply;
+}
+
+.stamp::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, .35) 0 14%, transparent 15% 100%),
+        radial-gradient(circle at 80% 55%, rgba(255, 255, 255, .25) 0 11%, transparent 12% 100%),
+        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, .22) 0 10%, transparent 11% 100%);
+    opacity: .55;
+    mix-blend-mode: screen;
+}
+
+.block {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 86%;
+    text-align: center;
+    color: var(--teal);
+}
+
+.title {
+    top: 21.6%;
+}
+
+.vessel {
+    top: 33.0%;
+}
+
+.consultant {
+    top: 40.2%;
+}
+
+.onbehalf {
+    top: 50.3%;
+}
+
+.period {
+    top: 54.0%;
+}
+
+.ports {
+    top: 63.7%;
+}
+
+.prepared {
+    top: 74.3%;
+}
+
+.h2 {
+    font-weight: 700;
+    font-size: clamp(18px, 2.2vw, 34px);
+}
+
+.vessel {
+    font-weight: 800;
+    font-size: clamp(24px, 3.0vw, 46px);
+    color: var(--teal-dark);
+}
+
+.label {
+    font-weight: 700;
+    font-size: clamp(14px, 1.6vw, 24px);
+    margin-bottom: 10px;
+}
+
+.value {
+    font-weight: 600;
+    font-size: clamp(12px, 1.25vw, 18px);
+}
+
+.onbehalf em {
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(11px, 1.15vw, 16px);
+}
+
+.footer-text {
+    position: absolute;
+    left: 3.0%;
+    bottom: 1.0%;
+    width: 69%;
+    color: #0b3f43;
+    font-size: clamp(6px, 0.75vw, 10px);
+    line-height: 1.25;
+}
+
+.ft-row {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.k {
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+@media print {
+    body {
+        background: #fff;
+        padding: 0;
+    }
+
+    .page {
+        width: 210mm;
+        height: 297mm;
+        aspect-ratio: auto;
+        box-shadow: none;
+    }
+}
+
+/* ---------- Inner page extras (Page 2+) ---------- */
+.meta-top {
+    position: absolute;
+    top: 6.0%;
+    right: 6.2%;
+    text-align: left;
+    color: var(--teal-dark);
+    font-size: clamp(10px, 1.1vw, 16px);
+    line-height: 1.55;
+    font-weight: 600;
+    max-width: 44%;
+}
+
+.content-area {
+    position: absolute;
+    left: 6.2%;
+    right: 6.2%;
+    top: 14.5%;
+    bottom: 10.0%;
+}
+
+.page-no {
+    position: absolute;
+    right: 5.6%;
+    bottom: 1.75%;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: clamp(10px, 1.1vw, 16px);
+    letter-spacing: .2px;
+    user-select: none;
+}
+
+
+/* ---------- Report content (tables/sections) ---------- */
+
+/* Section title like: "1. Audit Details" */
+.section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    color: var(--teal-dark);
+    font-weight: 800;
+    margin-top: 10px;
+}
+
+.section-num {
+    font-size: clamp(22px, 2.2vw, 32px);
+}
+
+.section-text {
+    font-size: clamp(22px, 2.2vw, 32px);
+}
+
+.section-rule {
+    height: 2px;
+    background: var(--teal-dark);
+    margin: 10px 0 18px;
+    width: 100%;
+}
+
+/* Subheadings */
+.subheading {
+    color: var(--teal-dark);
+    font-weight: 800;
+    font-size: clamp(18px, 1.8vw, 26px);
+    margin: 0 0 8px;
+}
+
+.subheading-lg {
+    margin-top: 0;
+}
+
+/* Spacing helpers */
+.spacer-xl {
+    height: clamp(18px, 2.6vw, 34px);
+}
+
+/* Tables (match PDF style) */
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1px solid rgba(0, 0, 0, .55);
+    font-size: clamp(11px, 1.05vw, 15px);
+    color: var(--teal-dark);
+}
+
+.report-table thead th {
+    background: var(--teal-dark);
+    color: #fff;
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 800;
+    letter-spacing: .2px;
+}
+
+.report-table td {
+    border: 1px solid rgba(0, 0, 0, .45);
+    padding: 10px 12px;
+    vertical-align: middle;
+}
+
+/* Label cells (teal) */
+.cell-label {
+    background: #0a7f89;
+    /* lighter teal band like PDF */
+    color: #fff;
+    font-style: italic;
+    font-weight: 700;
+    text-align: right;
+    padding-right: 12px;
+}
+
+/* Value cells (white) */
+.cell-value {
+    background: #fff;
+    color: var(--teal-dark);
+    font-weight: 700;
+}
+
+/* Contact table column widths (4 columns) */
+.contact-table colgroup col:nth-child(1) {
+    width: 22%;
+}
+
+.contact-table colgroup col:nth-child(2) {
+    width: 38%;
+}
+
+.contact-table colgroup col:nth-child(3) {
+    width: 12%;
+}
+
+.contact-table colgroup col:nth-child(4) {
+    width: 28%;
+}
+
+/* If no colgroup in HTML, still keep proportions decent */
+.contact-table td:nth-child(1),
+.contact-table td:nth-child(3) {
+    width: 22%;
+}
+
+.contact-table td:nth-child(2),
+.contact-table td:nth-child(4) {
+    width: 28%;
+}
+
+/* Approval table tweaks */
+.approval-table td {
+    vertical-align: top;
+}
+
+.signature-row .cell-value {
+    height: clamp(52px, 7vw, 86px);
+    /* big signature box */
+}
+
+.address-row .cell-value {
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+.address-row .cell-label {
+    vertical-align: top;
+}
+
+/* Make sure content doesn't hit edges */
+.content-area {
+    padding-top: 6px;
+}
+
+
+/* ---------- Page 4 (Responsibilities/Documentation) ---------- */
+
+/* Criteria boxes used on page 4 */
+.criteria-box {
+    width: 100%;
+    border: 2px solid rgba(1, 72, 77, .65);
+    margin: 0 0 18px;
+}
+
+.criteria-box table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.criteria-box td {
+    border: 1px solid rgba(1, 72, 77, .55);
+    padding: 10px 12px;
+    font-size: clamp(11px, 1.05vw, 14px);
+    color: var(--teal-dark);
+}
+
+.criteria-label {
+    background: #0a7f89;
+    color: #ffffff !important;
+    font-style: italic;
+    font-weight: 700;
+    text-align: right;
+    vertical-align: top;
+    padding-right: 14px !important;
+}
+
+.criteria-body {
+    background: #ffffff;
+    font-weight: 600;
+}
+
+.criteria-body p {
+    margin: 0 0 10px;
+}
+
+.criteria-body ul {
+    margin: 6px 0 0 22px;
+    padding: 0;
+}
+
+.criteria-body li {
+    margin: 3px 0;
+}
+
+.criteria-body-tight {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.red-x {
+    color: #d30b0b;
+    font-weight: 800;
+    font-size: clamp(18px, 2.2vw, 30px);
+    margin: 10px 0 18px;
+}
+
+/* Documentation checklist table (bottom of page 4) */
+.doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 2px solid rgba(1, 72, 77, .8);
+    margin-top: 8px;
+    font-size: clamp(11px, 1.0vw, 14px);
+    color: var(--teal-dark);
+}
+
+.doc-table th,
+.doc-table td {
+    border: 1px solid rgba(1, 72, 77, .55);
+    padding: 6px 10px;
+}
+
+.doc-head {
+    background: var(--teal-dark);
+    color: #ffffff;
+    text-align: left;
+    font-weight: 800;
+    font-size: clamp(14px, 1.25vw, 18px);
+    padding: 8px 12px;
+}
+
+.doc-section td {
+    font-weight: 800;
+    color: #0a7f89;
+    background: #ffffff;
+    font-size: clamp(13px, 1.15vw, 16px);
+    padding: 6px 10px;
+}
+
+.doc-item {
+    font-style: italic;
+    font-weight: 700;
+}
+
+.doc-q {
+    font-weight: 600;
+}
+
+.doc-yes {
+    text-align: right;
+    font-weight: 800;
+}
+
+
+/* ---------- Page 5 (Doc continuation + Pest Control Locker) ---------- */
+
+/* Slightly tighter criteria box on page 5 */
+.criteria-box-tight {
+    margin-top: 8px;
+    margin-bottom: 14px;
+}
+
+/* Documentation table variants */
+.doc-table-compact {
+    margin-top: 0;
+}
+
+/* Blank rows used to match PDF spacing */
+.doc-blank td {
+    height: 24px;
+    background: #ffffff;
+}
+
+/* Sub-section rows like "Signage" */
+.doc-subsection td {
+    font-weight: 800;
+    color: #0a7f89;
+    background: #ffffff;
+    font-size: clamp(13px, 1.1vw, 16px);
+    padding: 6px 10px;
+}
+
+/* Pest Control Locker table spacing */
+.doc-table-pcl {
+    margin-top: 10px;
+}
+
+
+/* ---------- Page 6 (Equipment checklist) ---------- */
+
+/* Tighter row padding for long checklists (page 6) */
+.doc-table-tight th,
+.doc-table-tight td {
+    padding: 5px 10px;
+}
+
+
+/* ---------- Page 7 (Chemical transportation) ---------- */
+
+.doc-table-page7 {
+    margin-top: 0;
+}
+
+
+/* Spacing helper */
+.spacer-lg {
+    height: clamp(10px, 1.8vw, 22px);
+}
+
+
+/* ---------- Page 8 (Galley) ---------- */
+.doc-table-page8 {
+    margin-top: 6px;
+}
+
+
+/* ---------- Page 9 (Non-compliance + Electric Fly Killers) ---------- */
+
+.doc-table-page9-top {
+    margin-top: 0;
+}
+
+.noncompliance-title {
+    font-weight: 800;
+    font-size: clamp(16px, 1.8vw, 22px);
+    color: #6b2a7a;
+    /* purple from PDF */
+    margin: 8px 0 10px;
+}
+
+.future-box {
+    border: 2px solid #0c5f66;
+    margin: 8px 0 12px;
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    background: #fff;
+}
+
+.future-left {
+    background: #0a7f89;
+    color: #fff;
+    font-weight: 700;
+    font-style: italic;
+    padding: 14px 12px;
+    line-height: 1.15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.future-body {
+    padding: 12px 14px 8px;
+    font-size: clamp(12px, 1.05vw, 14px);
+    color: #1a4447;
+}
+
+.future-body p {
+    margin: 0 0 8px;
+}
+
+.future-timeline {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    column-gap: 14px;
+    align-items: start;
+    margin: 4px 0 10px;
+}
+
+.future-bullets {
+    display: grid;
+    grid-template-columns: 16px 1fr;
+    row-gap: 6px;
+    column-gap: 8px;
+    font-style: italic;
+}
+
+.future-bullets .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #1a4447;
+    margin-top: 7px;
+}
+
+.future-dates {
+    display: grid;
+    row-gap: 6px;
+    font-style: italic;
+}
+
+.future-note {
+    font-style: italic;
+}
+
+.future-list {
+    margin: 0 0 6px 18px;
+    padding: 0;
+}
+
+.future-list li {
+    margin: 4px 0;
+}
+
+.future-bottom {
+    grid-column: 1 / -1;
+    border-top: 2px solid #0c5f66;
+    display: grid;
+    grid-template-columns: 170px 1fr;
+}
+
+.future-bottom .criteria-label {
+    background: #0a7f89;
+    color: #fff;
+    font-weight: 700;
+    font-style: italic;
+    padding: 8px 10px;
+    text-align: right;
+}
+
+.future-bottom .criteria-body {
+    padding: 8px 12px;
+    font-weight: 600;
+    color: #1a4447;
+}
+
+
+/* ---------- Page 10 (Electric Fly Killers continuation) ---------- */
+
+.doc-table-page10 {
+    margin-top: 6px;
+}
+
+
+/* ---------- Page 11 (Deck Department + Rat Guards) ---------- */
+
+.section-lead {
+    margin: 6px 0 10px;
+    color: #1a4447;
+    font-size: clamp(12px, 1.05vw, 14px);
+}
+
+.italic-title {
+    font-style: italic;
+    font-weight: 700;
+    color: #1a4447;
+    margin: 6px 0 8px;
+}
+
+.note-box {
+    border: 2px solid #6b2a7a;
+    margin: 10px 0 12px;
+    background: #fff;
+}
+
+.note-head {
+    background: #6b2a7a;
+    color: #fff;
+    font-weight: 800;
+    padding: 8px 12px;
+}
+
+.note-body {
+    padding: 10px 12px;
+    color: #1a4447;
+    border-top: 1px solid rgba(107, 42, 122, .35);
+}
+
+.note-comment {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    border-top: 2px solid rgba(107, 42, 122, .45);
+}
+
+.note-comment-left {
+    background: #6b2a7a;
+    color: #fff;
+    font-style: italic;
+    padding: 8px 10px;
+}
+
+.note-comment-right {
+    padding: 8px 10px;
+    color: #1a4447;
+}
+
+
+/* ---------- Page 12 (Non-Compliance Construction + Photo Grid) ---------- */
+
+.doc-table-page12-top {
+    margin-top: 6px;
+}
+
+/* Purple non-compliance block */
+.nc-box {
+    border: 2px solid #6b2a7a;
+    background: #fff;
+}
+
+.nc-head {
+    background: #6b2a7a;
+    color: #fff;
+    font-weight: 800;
+    padding: 8px 12px;
+    font-size: clamp(13px, 1.15vw, 16px);
+}
+
+.nc-desc {
+    padding: 10px 12px 8px;
+    color: #1a4447;
+    border-top: 1px solid rgba(107, 42, 122, .35);
+    font-size: clamp(12px, 1.05vw, 14px);
+}
+
+.nc-desc ul {
+    margin: 8px 0 0 18px;
+}
+
+.nc-desc li {
+    margin: 4px 0;
+}
+
+.nc-rows {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    border-top: 2px solid rgba(107, 42, 122, .45);
+}
+
+.nc-lab {
+    background: #6b2a7a;
+    color: #fff;
+    font-style: italic;
+    padding: 8px 10px;
+    border-top: 1px solid rgba(255, 255, 255, .18);
+    text-align: right;
+}
+
+.nc-val {
+    padding: 8px 10px;
+    color: #1a4447;
+    border-top: 1px solid rgba(107, 42, 122, .18);
+}
+
+/* Photo heading grid (purple rows with white picture placeholders) */
+.pic-grid {
+    border-top: 2px solid rgba(107, 42, 122, .45);
+}
+
+.pic-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.pic-row-3,
+.pic-row-4 {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.pic-row-5 {
+    grid-template-columns: 1fr;
+}
+
+.pic-cell {
+    border-top: 1px solid rgba(255, 255, 255, .10);
+    border-left: 1px solid rgba(255, 255, 255, .10);
+    background: #6b2a7a;
+    min-height: 66px;
+    display: flex;
+    flex-direction: column;
+}
+
+.pic-cell:first-child {
+    border-left: none;
+}
+
+.pic-head {
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    padding: 8px 6px;
+    font-size: clamp(12px, 1.05vw, 14px);
+}
+
+.pic-body {
+    height: 44px;
+    margin: 6px 10px 10px;
+    background: rgba(255, 255, 255, .92);
+    border-radius: 2px;
+}
+
+.pic-body-wide {
+    height: 44px;
+    margin: 6px 10px 10px;
+}
+
+.pic-cell-full {
+    min-height: 54px;
+}
+
+.pic-cell-full .pic-head {
+    padding: 10px 6px;
+}
