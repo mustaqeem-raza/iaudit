@@ -34,7 +34,7 @@ body {
 
 .page {
     position: relative;
-    width: min(1241px, 96vw);
+    /* width: min(1241px, 96vw); */
     aspect-ratio: calc(var(--page-w) / var(--page-h));
     background: #fff;
     overflow: hidden;

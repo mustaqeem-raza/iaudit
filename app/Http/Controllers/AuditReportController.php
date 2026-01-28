@@ -67,6 +67,4 @@ class AuditReportController extends Controller
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('audit-report-bootstrap', compact('data'));
         return $pdf->stream('audit-report-bootstrap.pdf'); // Opens in browser
     }
-
-
 }
