@@ -197,7 +197,8 @@ body {
     top: 6.0%;
     right: 6.2%;
     text-align: left;
-    color: var(--teal-dark);
+    /* color: var(--teal-dark); */
+    color: #fff;
     font-size: clamp(10px, 1.1vw, 16px);
     line-height: 1.55;
     font-weight: 600;

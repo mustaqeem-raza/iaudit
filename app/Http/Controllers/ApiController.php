@@ -8,6 +8,7 @@ use App\Models\CrtTrapLocationIaudit;
 use App\Models\DepartmentIaudit;
 use App\Models\EfkIAudit;
 use App\Models\OtherCrtIAudit;
+use App\Models\OtherEfkIAudit;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -381,53 +382,173 @@ class ApiController extends Controller
     public function otherCrtLocations()
     {
         $rows = OtherCrtIAudit::select(
+            'id',
             'other_crt_ref',
             'other_crt_main_heading',
+            'other_crt_ordinal',
             'other_crt_category',
             'other_crt_sub_category',
+            'other_crt_sub_heading',
             'other_crt_type',
             'other_crt_type_mnemonic',
+            'other_crt_compliance',
+            'other_crt_logic',
             'other_crt_non_compliance_text',
-            'other_crt_i_info'
-        )->orderBy('other_crt_ordinal')->get()
+            'other_crt_i_info',
+            'other_crt_usph_ref',
+            'other_crt_ship_san_ref',
+            'other_crt_anvia_ref',
+            'other_crt_mpi_ref'
+        )
+            ->orderBy('other_crt_ordinal')
+            ->get()
             ->groupBy('other_crt_main_heading');
 
         $result = $rows->map(function ($mainRows, $mainHeading) {
 
-            $categories = $mainRows->groupBy('other_crt_category')->map(function ($catRows, $category) {
-
-                $subCategories = $catRows->groupBy('other_crt_sub_category')->map(function ($subRows, $subCategory) {
-
-                    $items = $subRows->map(function ($row) {
-                        return [
-                            'type'                 => $row->other_crt_type,
-                            'type_mnemonic'        => $row->other_crt_type_mnemonic,
-                            'non_compliance_text' => $row->other_crt_non_compliance_text,
-                            'i_info'              => $row->other_crt_i_info,
-                        ];
-                    })->values();
-
-                    return [
-                        'sub_category' => $subCategory,
-                        'items'        => $items,
-                    ];
-                })->values();
-
-                return [
-                    'category'      => $category,
-                    'sub_categories' => $subCategories,
-                ];
-            })->values();
-
             return [
                 'ref'          => optional($mainRows->first())->other_crt_ref,
                 'main_heading' => $mainHeading,
-                'details'      => $categories,
+
+                'categories' => $mainRows
+                    ->groupBy('other_crt_category')
+                    ->map(function ($catRows, $category) {
+
+                        return [
+                            'category' => $category,
+
+                            'sub_categories' => $catRows
+                                ->groupBy('other_crt_sub_category')
+                                ->map(function ($subRows, $subCategory) {
+
+                                    return [
+                                        'sub_category' => $subCategory,
+
+                                        'items' => $subRows->map(function ($row) {
+                                            return [
+                                                'id' => $row->id,
+                                                'ordinal' => $row->other_crt_ordinal,
+
+                                                'sub_heading' => $row->other_crt_sub_heading,
+
+                                                'type' => [
+                                                    'name' => $row->other_crt_type,
+                                                    'mnemonic' => $row->other_crt_type_mnemonic,
+                                                ],
+
+                                                'compliance' => $row->other_crt_compliance,
+                                                'logic' => $row->other_crt_logic,
+
+                                                'content' => [
+                                                    'non_compliance_text' => $row->other_crt_non_compliance_text,
+                                                    'i_info'              => $row->other_crt_i_info,
+                                                ],
+
+                                                'references' => [
+                                                    'usph'     => $row->other_crt_usph_ref,
+                                                    'ship_san' => $row->other_crt_ship_san_ref,
+                                                    'anvia'    => $row->other_crt_anvia_ref,
+                                                    'mpi'      => $row->other_crt_mpi_ref,
+                                                ],
+                                            ];
+                                        })->values(),
+                                    ];
+                                })->values(),
+                        ];
+                    })->values(),
             ];
         })->values();
 
         return response()->json([
             'success' => true,
+            'count'   => $rows->flatten()->count(),
+            'data'    => $result,
+        ]);
+    }
+
+    public function otherEfkLocations()
+    {
+        $rows = OtherEfkIAudit::select(
+            'id',
+            'other_efk_ref',
+            'other_efk_main_heading',
+            'other_efk_ordinal',
+            'other_efk_category',
+            'other_efk_sub_category',
+            'other_efk_sub_heading',
+            'other_efk_type',
+            'other_efk_type_mnemonic',
+            'other_efk_compliance',
+            'other_efk_logic',
+            'other_efk_non_compliance_text',
+            'other_efk_i_info',
+            'other_efk_usph_ref',
+            'other_efk_ship_san_ref',
+            'other_efk_anvia_ref',
+            'other_efk_mpi_ref'
+        )
+            ->orderBy('other_efk_ordinal')
+            ->get()
+            ->groupBy('other_efk_main_heading');
+
+        $result = $rows->map(function ($mainRows, $mainHeading) {
+
+            return [
+                'ref'          => optional($mainRows->first())->other_efk_ref,
+                'main_heading' => $mainHeading,
+
+                'categories' => $mainRows
+                    ->groupBy('other_efk_category')
+                    ->map(function ($catRows, $category) {
+
+                        return [
+                            'category' => $category,
+
+                            'sub_categories' => $catRows
+                                ->groupBy('other_efk_sub_category')
+                                ->map(function ($subRows, $subCategory) {
+
+                                    return [
+                                        'sub_category' => $subCategory,
+
+                                        'items' => $subRows->map(function ($row) {
+                                            return [
+                                                'id' => $row->id,
+                                                'ordinal' => $row->other_efk_ordinal,
+
+                                                'sub_heading' => $row->other_efk_sub_heading,
+
+                                                'type' => [
+                                                    'name' => $row->other_efk_type,
+                                                    'mnemonic' => $row->other_efk_type_mnemonic,
+                                                ],
+
+                                                'compliance' => $row->other_efk_compliance,
+                                                'logic'      => $row->other_efk_logic,
+
+                                                'content' => [
+                                                    'non_compliance_text' => $row->other_efk_non_compliance_text,
+                                                    'i_info'              => $row->other_efk_i_info,
+                                                ],
+
+                                                'references' => [
+                                                    'usph'     => $row->other_efk_usph_ref,
+                                                    'ship_san' => $row->other_efk_ship_san_ref,
+                                                    'anvia'    => $row->other_efk_anvia_ref,
+                                                    'mpi'      => $row->other_efk_mpi_ref,
+                                                ],
+                                            ];
+                                        })->values(),
+                                    ];
+                                })->values(),
+                        ];
+                    })->values(),
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'count'   => $rows->flatten()->count(),
             'data'    => $result,
         ]);
     }

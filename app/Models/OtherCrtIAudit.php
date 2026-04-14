@@ -14,10 +14,16 @@ class OtherCrtIAudit extends Model
         'other_crt_ordinal',
         'other_crt_type_mnemonic',
         'other_crt_type',
+        'other_crt_compliance',
+        'other_crt_logic',
         'other_crt_sub_heading',
         'other_crt_category',
         'other_crt_sub_category',
         'other_crt_non_compliance_text',
         'other_crt_i_info',
+        'other_crt_usph_ref',
+        'other_crt_ship_san_ref',
+        'other_crt_anvia_ref',
+        'other_crt_mpi_ref',
     ];
 }
