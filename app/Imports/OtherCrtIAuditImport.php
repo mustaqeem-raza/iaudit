@@ -19,7 +19,7 @@ class OtherCrtIAuditImport implements ToModel, WithHeadingRow, SkipsEmptyRows
             'other_crt_type'          => $row['other_crt_type'] ?? null,
             'other_crt_compliance'    => $row['other_crt_compliance'] ?? null,
             'other_crt_logic'         => $row['other_crt_logic'] ?? null,
-            'other_crt_sub_heading'   => $row['other_crt__sub_heading'] ?? null,
+            'other_crt_sub_heading'   => $row['other_crt_sub_heading'] ?? null,
             'other_crt_category'      => $row['other_crt_category'] ?? null,
             'other_crt_sub_category'  => $row['other_crt_sub_category'] ?? null,
             'other_crt_non_compliance_text' => $row['other_crt_non_compliance_text'] ?? null,

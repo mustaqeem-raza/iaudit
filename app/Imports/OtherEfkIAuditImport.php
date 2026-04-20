@@ -23,9 +23,7 @@ class OtherEfkIAuditImport implements ToModel, WithHeadingRow, SkipsEmptyRows
             'other_efk_logic'         => $row['other_efk_logic'] ?? null,
 
             // handle possible double underscore issue
-            'other_efk_sub_heading'   => $row['other_efk__sub_heading']
-                ?? $row['other_efk_sub_heading']
-                ?? null,
+            'other_efk_sub_heading'   => $row['other_efk_sub_heading'] ?? null,
 
             'other_efk_category'      => $row['other_efk_category'] ?? null,
             'other_efk_sub_category'  => $row['other_efk_sub_category'] ?? null,
