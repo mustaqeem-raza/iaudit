@@ -481,6 +481,7 @@ class ApiController extends Controller
             'other_efk_main_heading',
             'other_efk_ordinal',
             'other_efk_sub_heading',
+            'other_efk_category',
             'other_efk_sub_category',
             'other_efk_type',
             'other_efk_type_mnemonic',
