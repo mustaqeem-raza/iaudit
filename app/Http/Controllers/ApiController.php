@@ -386,9 +386,9 @@ class ApiController extends Controller
             'other_crt_ref',
             'other_crt_main_heading',
             'other_crt_ordinal',
+            'other_crt_sub_heading',
             'other_crt_category',
             'other_crt_sub_category',
-            'other_crt_sub_heading',
             'other_crt_type',
             'other_crt_type_mnemonic',
             'other_crt_compliance',
@@ -410,48 +410,55 @@ class ApiController extends Controller
                 'ref'          => optional($mainRows->first())->other_crt_ref,
                 'main_heading' => $mainHeading,
 
-                'categories' => $mainRows
-                    ->groupBy('other_crt_category')
-                    ->map(function ($catRows, $category) {
+                'sub_headings' => $mainRows
+                    ->groupBy('other_crt_sub_heading')
+                    ->map(function ($subHeadingRows, $subHeading) {
 
                         return [
-                            'category' => $category,
+                            'sub_heading' => $subHeading,
 
-                            'sub_categories' => $catRows
-                                ->groupBy('other_crt_sub_category')
-                                ->map(function ($subRows, $subCategory) {
+                            'categories' => $subHeadingRows
+                                ->groupBy('other_crt_category')
+                                ->map(function ($catRows, $category) {
 
                                     return [
-                                        'sub_category' => $subCategory,
+                                        'category' => $category,
 
-                                        'items' => $subRows->map(function ($row) {
-                                            return [
-                                                'id' => $row->id,
-                                                'ordinal' => $row->other_crt_ordinal,
+                                        'sub_categories' => $catRows
+                                            ->groupBy('other_crt_sub_category')
+                                            ->map(function ($subRows, $subCategory) {
 
-                                                'sub_heading' => $row->other_crt_sub_heading,
+                                                return [
+                                                    'sub_category' => $subCategory,
 
-                                                'type' => [
-                                                    'name' => $row->other_crt_type,
-                                                    'mnemonic' => $row->other_crt_type_mnemonic,
-                                                ],
+                                                    'items' => $subRows->map(function ($row) {
+                                                        return [
+                                                            'id' => $row->id,
+                                                            'ordinal' => $row->other_crt_ordinal,
 
-                                                'compliance' => $row->other_crt_compliance,
-                                                'logic' => $row->other_crt_logic,
+                                                            'type' => [
+                                                                'name' => $row->other_crt_type,
+                                                                'mnemonic' => $row->other_crt_type_mnemonic,
+                                                            ],
 
-                                                'content' => [
-                                                    'non_compliance_text' => $row->other_crt_non_compliance_text,
-                                                    'i_info'              => $row->other_crt_i_info,
-                                                ],
+                                                            'compliance' => $row->other_crt_compliance,
+                                                            'logic' => $row->other_crt_logic,
 
-                                                'references' => [
-                                                    'usph'     => $row->other_crt_usph_ref,
-                                                    'ship_san' => $row->other_crt_ship_san_ref,
-                                                    'anvia'    => $row->other_crt_anvia_ref,
-                                                    'mpi'      => $row->other_crt_mpi_ref,
-                                                ],
-                                            ];
-                                        })->values(),
+                                                            'content' => [
+                                                                'non_compliance_text' => $row->other_crt_non_compliance_text,
+                                                                'i_info'              => $row->other_crt_i_info,
+                                                            ],
+
+                                                            'references' => [
+                                                                'usph'     => $row->other_crt_usph_ref,
+                                                                'ship_san' => $row->other_crt_ship_san_ref,
+                                                                'anvia'    => $row->other_crt_anvia_ref,
+                                                                'mpi'      => $row->other_crt_mpi_ref,
+                                                            ],
+                                                        ];
+                                                    })->values(),
+                                                ];
+                                            })->values(),
                                     ];
                                 })->values(),
                         ];
@@ -473,9 +480,8 @@ class ApiController extends Controller
             'other_efk_ref',
             'other_efk_main_heading',
             'other_efk_ordinal',
-            'other_efk_category',
-            'other_efk_sub_category',
             'other_efk_sub_heading',
+            'other_efk_sub_category',
             'other_efk_type',
             'other_efk_type_mnemonic',
             'other_efk_compliance',
@@ -497,48 +503,55 @@ class ApiController extends Controller
                 'ref'          => optional($mainRows->first())->other_efk_ref,
                 'main_heading' => $mainHeading,
 
-                'categories' => $mainRows
-                    ->groupBy('other_efk_category')
-                    ->map(function ($catRows, $category) {
+                'sub_headings' => $mainRows
+                    ->groupBy('other_efk_sub_heading')
+                    ->map(function ($subHeadingRows, $subHeading) {
 
                         return [
-                            'category' => $category,
+                            'sub_heading' => $subHeading,
 
-                            'sub_categories' => $catRows
-                                ->groupBy('other_efk_sub_category')
-                                ->map(function ($subRows, $subCategory) {
+                            'categories' => $subHeadingRows
+                                ->groupBy('other_efk_category')
+                                ->map(function ($catRows, $category) {
 
                                     return [
-                                        'sub_category' => $subCategory,
+                                        'category' => $category,
 
-                                        'items' => $subRows->map(function ($row) {
-                                            return [
-                                                'id' => $row->id,
-                                                'ordinal' => $row->other_efk_ordinal,
+                                        'sub_categories' => $catRows
+                                            ->groupBy('other_efk_sub_category')
+                                            ->map(function ($subRows, $subCategory) {
 
-                                                'sub_heading' => $row->other_efk_sub_heading,
+                                                return [
+                                                    'sub_category' => $subCategory,
 
-                                                'type' => [
-                                                    'name' => $row->other_efk_type,
-                                                    'mnemonic' => $row->other_efk_type_mnemonic,
-                                                ],
+                                                    'items' => $subRows->map(function ($row) {
+                                                        return [
+                                                            'id' => $row->id,
+                                                            'ordinal' => $row->other_efk_ordinal,
 
-                                                'compliance' => $row->other_efk_compliance,
-                                                'logic'      => $row->other_efk_logic,
+                                                            'type' => [
+                                                                'name' => $row->other_efk_type,
+                                                                'mnemonic' => $row->other_efk_type_mnemonic,
+                                                            ],
 
-                                                'content' => [
-                                                    'non_compliance_text' => $row->other_efk_non_compliance_text,
-                                                    'i_info'              => $row->other_efk_i_info,
-                                                ],
+                                                            'compliance' => $row->other_efk_compliance,
+                                                            'logic'      => $row->other_efk_logic,
 
-                                                'references' => [
-                                                    'usph'     => $row->other_efk_usph_ref,
-                                                    'ship_san' => $row->other_efk_ship_san_ref,
-                                                    'anvia'    => $row->other_efk_anvia_ref,
-                                                    'mpi'      => $row->other_efk_mpi_ref,
-                                                ],
-                                            ];
-                                        })->values(),
+                                                            'content' => [
+                                                                'non_compliance_text' => $row->other_efk_non_compliance_text,
+                                                                'i_info'              => $row->other_efk_i_info,
+                                                            ],
+
+                                                            'references' => [
+                                                                'usph'     => $row->other_efk_usph_ref,
+                                                                'ship_san' => $row->other_efk_ship_san_ref,
+                                                                'anvia'    => $row->other_efk_anvia_ref,
+                                                                'mpi'      => $row->other_efk_mpi_ref,
+                                                            ],
+                                                        ];
+                                                    })->values(),
+                                                ];
+                                            })->values(),
                                     ];
                                 })->values(),
                         ];
