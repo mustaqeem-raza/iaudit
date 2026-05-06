@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Spatie\Browsershot\Browsershot;
 
 class AuditReportController extends Controller
 {
@@ -27,7 +29,30 @@ class AuditReportController extends Controller
 
     public function showPDFReport()
     {
-        return view('audit-pdf-report');
+        $html = view('audit-pdf-report-bkp')->render();
+
+        file_put_contents(
+            storage_path('app/debug-audit-report.html'),
+            $html
+        );
+
+        $pdf = Browsershot::html($html)
+            ->setNodeBinary('/usr/bin/node')
+            ->setNpmBinary('/usr/bin/npm')
+            ->setChromePath('/usr/bin/google-chrome')
+            ->noSandbox()
+            ->disableJavascript()
+            ->setOption('waitUntil', 'load')
+            ->timeout(120)
+            ->format('A4')
+            ->pdf();
+
+        return response($pdf)
+            ->header('Content-Type', 'application/pdf')
+            ->header(
+                'Content-Disposition',
+                'inline; filename="audit-report.pdf"'
+            );
     }
 
     public function downloadPdf()
@@ -45,7 +70,7 @@ class AuditReportController extends Controller
             ]
         ];
 
-        $pdf = downloadPdf::loadView('audit-report', compact('data'));
+        $pdf = Pdf::loadView('audit-report', compact('data'));
         return $pdf->download('audit-report.pdf');
     }
 
@@ -64,7 +89,7 @@ class AuditReportController extends Controller
             ]
         ];
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('audit-report-bootstrap', compact('data'));
+        $pdf = Pdf::loadView('audit-report-bootstrap', compact('data'));
         return $pdf->stream('audit-report-bootstrap.pdf'); // Opens in browser
     }
 }
