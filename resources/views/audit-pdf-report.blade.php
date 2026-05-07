@@ -5,16 +5,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Integrated Pest Management Audit Report - Cover</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/pdf-style.css') }}" />
+    <style>
+        {!! file_get_contents(public_path('css/pdf-style.css')) !!}
+
+        body {
+            font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+        }
+    </style>
 </head>
 
 <body>
     <main class="stage">
         <section class="page" aria-label="Cover page">
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
             <div class="stamp" aria-label="Internal use only stamp">
                 <div>Ship &amp; Head Office</div>
                 <div>Internal Use ONLY</div>
@@ -23,7 +26,7 @@
                 <div class="h2">Integrated Pest Management</div>
                 <div class="h2">Audit Report</div>
             </div>
-            <div class="block vessel">Viking Mars (VOCX-MARS)</div>
+            <div class="block vessel">{{ $auditData['ship_name'] ?? 'Viking Mars' }} ({{ $auditData['ship_mnemonic'] ?? 'VOCX-MARS' }})</div>
             <div class="block consultant">
                 <div class="label">IPM Consultant</div>
                 <div class="value">IPMConsultantName, IPMConsultantPosition</div>
@@ -48,11 +51,11 @@
                 <div class="ft-row"><span class="k">Registered office:</span> c/o Ayres Bright Vickers, Chartered Accountants, Bishopstoke, 36 Crescent Road, Worthing, West Sussex, BN11 1RL, UK</div>
                 <div class="ft-row"><span class="k">Prof. Association:</span> National Pest Technicians Association, NPTA House, Hall Lane, Knoulton, Nottingham, NG12 3EF &nbsp;&nbsp; Member: 504</div>
             </div>
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
         </section>
 
         <section class="page page-inner" aria-label="Inner page template">
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -63,14 +66,14 @@
                 <!-- Put your page content here -->
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 2 of 12</div>
         </section>
 
         <section class="page page-inner" aria-label="Audit details page">
 
             <!-- Header graphic -->
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <!-- Top-right meta -->
             <div class="meta-top">
@@ -193,14 +196,14 @@
             </div>
 
             <!-- Footer wedge + page number -->
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 3 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Responsibilities and documentation page">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -384,14 +387,14 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 4 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Documentation and pest control locker page">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -619,14 +622,14 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 5 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Pest control equipment checklist page">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -851,14 +854,14 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 6 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Chemical transportation page">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -921,17 +924,17 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 7 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Galley pest observations and traps page">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
+                <div>IPM Audit Report: <b>{{ $auditData['ship_name'] ?? 'Viking Mars' }} ({{ $auditData['ship_mnemonic'] ?? 'VOCX-MARS' }})</b></div>
                 <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
             </div>
 
@@ -1152,14 +1155,14 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 8 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Non-compliance and electric fly killers page">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -1373,14 +1376,14 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 9 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Electric Fly Killers maintenance continuation">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -1496,14 +1499,14 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 10 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Deck Department and Rat Guards">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -1695,14 +1698,14 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 11 of 12</div>
 
         </section>
 
         <section class="page page-inner" aria-label="Rat Guards - Non Compliance Construction">
 
-            <img class="header" src="{{ asset('assets/header.png') }}" alt="" />
+            <img class="header" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/header.png'))) }}" alt="" />
 
             <div class="meta-top">
                 <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
@@ -1833,7 +1836,7 @@
 
             </div>
 
-            <img class="footer-wedge" src="{{ asset('assets/footer.png') }}" alt="" />
+            <img class="footer-wedge" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/footer.png'))) }}" alt="" />
             <div class="page-no">Page 12 of 12</div>
 
         </section>

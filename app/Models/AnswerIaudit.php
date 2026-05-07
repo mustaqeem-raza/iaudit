@@ -15,6 +15,7 @@ class AnswerIaudit extends Model
         'answer',
         'note',
         'files',
+        'audit_id',
     ];
 
     protected $casts = [
@@ -34,5 +35,10 @@ class AnswerIaudit extends Model
     public function ship()
     {
         return $this->belongsTo(Ship::class, 'ship_id');
+    }
+
+    public function audit()
+    {
+        return $this->belongsTo(Audit::class, 'audit_id');
     }
 }

@@ -29,8 +29,10 @@ class AuditReportController extends Controller
 
     public function showPDFReport()
     {
-        $html = view('audit-pdf-report-bkp')->render();
+        return view('audit-pdf-report');
+        $html = view('audit-pdf-report')->render();
 
+        // Debug: save HTML for inspection
         file_put_contents(
             storage_path('app/debug-audit-report.html'),
             $html

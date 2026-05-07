@@ -4,12 +4,20 @@ use App\Http\Controllers\AuditReportController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+// Audit listing page
+Route::get('/audits', [AuditReportController::class, 'index'])->name('audit.index');
+
 // Preview PDF in browser
 Route::get('/audit-report/preview', [AuditReportController::class, 'previewPdf'])->name('audit.report.preview');
 
 Route::get('/audit-report', [AuditReportController::class, 'showReport'])->name('audit.report');
 Route::get('/audit-report/pdf', [AuditReportController::class, 'downloadPdf'])->name('audit.report.pdf');
 Route::get('/audit-pdf-report', [AuditReportController::class, 'showPDFReport'])->name('audit.report');
+
+// Audit specific routes (with ID)
+Route::get('/audit/{id}/report', [AuditReportController::class, 'showReport'])->name('audit.report.show');
+Route::get('/audit/{id}/pdf', [AuditReportController::class, 'downloadPdf'])->name('audit.report.pdf.show');
+Route::get('/audit/{id}/download', [AuditReportController::class, 'downloadPdf'])->name('audit.download');
 
 Route::get('/', function () {
     return view('welcome');
