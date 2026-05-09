@@ -191,46 +191,51 @@ class ApiController extends Controller
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        // Validate request
         $validated = $request->validate([
-            'ship_id'     => ['required', 'integer', 'exists:ships,id'],
-            'question_id' => ['required', 'integer', 'exists:questions_iaudit,question_id'],
-            'answer'      => ['required', Rule::in(['Yes', 'No', 'N/A'])],
-            'note'        => ['nullable', 'string', 'max:2000'],
-            'file'        => ['nullable'], // single or multiple
-            'file.*'      => [
+            'ship_id'               => ['required', 'integer', 'exists:ships,id'],
+            'answers'               => ['required', 'array', 'min:1'],
+            'answers.*.question_id' => ['required', 'integer', 'exists:questions_iaudit,question_id'],
+            'answers.*.answer'      => ['required', Rule::in(['Yes', 'No', 'N/A'])],
+            'answers.*.note'        => ['nullable', 'string', 'max:2000'],
+            'answers.*.files'       => ['nullable', 'array'],
+            'answers.*.files.*'     => [
                 'file',
                 'mimes:jpg,jpeg,png,gif,svg,pdf,doc,docx,xlsx,xls,txt,mp4,mov,avi,mkv',
                 'max:10240',
             ],
         ]);
 
-        $savedFiles = [];
-
         DB::beginTransaction();
         try {
-            // Create answer
-            $answer = AnswerIaudit::create([
-                'user_id'     => $user->id,
-                'ship_id'     => $validated['ship_id'],
-                'question_id' => $validated['question_id'],
-                'answer'      => $validated['answer'],
-                'note'        => $validated['note'] ?? null,
-                'files'       => null,
+            // One Audit record groups all answers for this submission
+            $audit = \App\Models\Audit::create([
+                'user_id'          => $user->id,
+                'ship_id'          => $validated['ship_id'],
+                'reference_number' => 'AUD-' . strtoupper(uniqid()),
+                'status'           => 'completed',
             ]);
 
-            // Normalize to array (handles both single & multiple files)
-            $files = $request->file('file');
-            if ($files) {
-                $files = is_array($files) ? $files : [$files];
+            foreach ($validated['answers'] as $index => $answerData) {
+                $answer = AnswerIaudit::create([
+                    'audit_id'    => $audit->id,
+                    'user_id'     => $user->id,
+                    'ship_id'     => $validated['ship_id'],
+                    'question_id' => $answerData['question_id'],
+                    'answer'      => $answerData['answer'],
+                    'note'        => $answerData['note'] ?? null,
+                    'files'       => null,
+                ]);
 
-                foreach ($files as $file) {
-                    if (! $file->isValid()) {
+                $uploadedFiles = $request->file("answers.{$index}.files") ?? [];
+                $savedFiles    = [];
+
+                foreach ((array) $uploadedFiles as $file) {
+                    if (! $file || ! $file->isValid()) {
                         Log::warning("Invalid file skipped for answer {$answer->id}");
                         continue;
                     }
 
-                    $path = $file->store("audits/{$answer->id}", 'public');
+                    $path = $file->store("audits/{$audit->id}", 'public');
 
                     $savedFiles[] = [
                         'path'          => $path,
@@ -259,6 +264,10 @@ class ApiController extends Controller
         return response()->json([
             'message' => 'Audit answer submitted successfully.',
             'data'    => [
+                'status'        => 'success',
+                'audit_id'      => $audit->id,
+                'reference'     => $audit->reference_number,
+                'total_answers' => count($validated['answers']),
                 'id'          => $answer->id,
                 'user_id'     => $answer->user_id,
                 'ship_id'     => $answer->ship_id,
