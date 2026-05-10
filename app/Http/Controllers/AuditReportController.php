@@ -9,6 +9,7 @@ use App\Models\EfkIAudit;
 use App\Models\Ship;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Spatie\Browsershot\Browsershot;
 
 class AuditReportController extends Controller
@@ -63,24 +64,15 @@ class AuditReportController extends Controller
     public function showReport($id = null)
     {
         $auditData = $id ? $this->buildAuditData($id) : $this->emptyAuditData();
-        return view('audit-pdf-report', compact('auditData'));
+        return view('static-audit-pdf-report', compact('auditData'));
     }
 
     public function showPDFReport($id = null)
     {
         $auditData = $id ? $this->buildAuditData($id) : $this->emptyAuditData();
-        $html = view('audit-pdf-report', compact('auditData'))->render();
+        $html = view('static-audit-pdf-report', compact('auditData'))->render();
 
-        $pdf = Browsershot::html($html)
-            ->setNodeBinary('/usr/bin/node')
-            ->setNpmBinary('/usr/bin/npm')
-            ->setChromePath('/usr/bin/google-chrome')
-            ->noSandbox()
-            ->disableJavascript()
-            ->setOption('waitUntil', 'load')
-            ->timeout(120)
-            ->format('A4')
-            ->pdf();
+        $pdf = $this->renderPdf($html);
 
         return response($pdf)
             ->header('Content-Type', 'application/pdf')
@@ -92,20 +84,60 @@ class AuditReportController extends Controller
         $auditData = $id ? $this->buildAuditData($id) : $this->emptyAuditData();
         $html = view('audit-pdf-report', compact('auditData'))->render();
 
-        $pdf = Browsershot::html($html)
+        $pdf = $this->renderPdf($html);
+
+        return response($pdf)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="audit-report-' . ($id ?? 'export') . '.pdf"');
+    }
+
+    /**
+     * Render HTML to PDF.
+     *
+     * Uses PDFShift (Chromium-based HTTP API) when PDFSHIFT_API_KEY is set
+     * — required on Hostinger Premium where Node/Chromium aren't available.
+     * Falls back to Browsershot locally for dev when no key is configured.
+     *
+     * Viewport is fixed at 1241x1755 to match the design's `--page-w`/`--page-h`,
+     * so the many `clamp(_, vw, _)` rules in pdf-style.css resolve to their
+     * intended sizes instead of collapsing to the `min` value at A4 width.
+     */
+    private function renderPdf(string $html): string
+    {
+        $apiKey = config('services.pdfshift.key');
+
+        if ($apiKey) {
+            $response = Http::withBasicAuth('api', $apiKey)
+                ->timeout(120)
+                ->asJson()
+                ->acceptJson()
+                ->post('https://api.pdfshift.io/v3/convert/pdf', [
+                    'source'    => $html,
+                    'format'    => 'A4',
+                    'margin'    => '0',
+                    'use_print' => true,
+                    'viewport'  => '1241x1755',
+                    'sandbox'   => false,
+                ]);
+
+            if (! $response->successful()) {
+                abort(502, 'PDF generation failed: ' . $response->body());
+            }
+
+            return $response->body();
+        }
+
+        return Browsershot::html($html)
             ->setNodeBinary('/usr/bin/node')
             ->setNpmBinary('/usr/bin/npm')
             ->setChromePath('/usr/bin/google-chrome')
             ->noSandbox()
             ->disableJavascript()
             ->setOption('waitUntil', 'load')
+            ->windowSize(1241, 1755)
             ->timeout(120)
             ->format('A4')
             ->pdf();
-
-        return response($pdf)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="audit-report-' . ($id ?? 'export') . '.pdf"');
     }
 
     /**

@@ -23,3 +23,6 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 .claude/settings.local.json
+node_modules/
+package.json
+package-lock.json
