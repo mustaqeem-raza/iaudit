@@ -1,8 +1,69 @@
 @php
-
     $headerImg = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('assets/header.png')));
     $footerImg = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('assets/footer.png')));
 
+    $auditData = $auditData ?? [];
+    $answersByText = $auditData['answers_by_question_text'] ?? collect();
+
+    // Look up the submitted answer for a question by its text. Returns a
+    // ['cls' => ..., 'text' => ...] pair the doc-tables can render. When no
+    // answer exists (preview / unanswered question) we fall back to a
+    // neutral em-dash so the static template stays presentable.
+    $A = function ($questionText) use ($answersByText) {
+        $key = mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $questionText)));
+        $a = $answersByText instanceof \Illuminate\Support\Collection
+            ? $answersByText->get($key)
+            : ($answersByText[$key] ?? null);
+
+        if (!$a) {
+            return ['cls' => 'doc-na', 'text' => '—'];
+        }
+
+        $cls = match ($a->answer) {
+            'No'  => 'doc-no',
+            'N/A' => 'doc-na',
+            default => 'doc-yes',
+        };
+
+        return ['cls' => $cls, 'text' => $a->answer];
+    };
+
+    // Helpers for header/cover metadata. Format the dates the way the static
+    // template displays them and gracefully fall back when data is missing.
+    $fmtLong = function ($d) {
+        if (!$d) return '';
+        try { return \Carbon\Carbon::parse($d)->format('l, j M Y'); } catch (\Throwable $e) { return ''; }
+    };
+    $fmtShort = function ($d) {
+        if (!$d) return '';
+        try { return \Carbon\Carbon::parse($d)->format('D, j M Y'); } catch (\Throwable $e) { return ''; }
+    };
+
+    $shipName     = $auditData['ship_name']     ?? '';
+    $shipMnemonic = $auditData['ship_mnemonic'] ?? '';
+    $vesselLabel  = trim($shipName . ($shipMnemonic ? " ({$shipMnemonic})" : ''));
+
+    $dateFromLong  = $fmtLong($auditData['date_from']  ?? null);
+    $dateToLong    = $fmtLong($auditData['date_to']    ?? null);
+    $dateFromShort = $fmtShort($auditData['date_from'] ?? null);
+    $dateToShort   = $fmtShort($auditData['date_to']   ?? null);
+
+    $auditPeriodLong  = ($dateFromLong && $dateToLong) ? "{$dateFromLong} to {$dateToLong}" : ($dateFromLong ?: '—');
+    $auditPeriodShort = ($dateFromShort && $dateToShort)
+        ? '<b>'.$dateFromShort.'</b> to <b>'.$dateToShort.'</b>'
+        : '<b>—</b>';
+
+    $consultantLine = trim(implode(', ', array_filter([
+        $auditData['consultant'] ?? null,
+        $auditData['consultant_position'] ?? null,
+    ])));
+    $preparedForLine = trim(implode(', ', array_filter([
+        $auditData['pic_name'] ?? null,
+        $auditData['pic_position'] ?? null,
+    ])));
+    $portsLine = ($auditData['port_from'] ?? null) && ($auditData['port_to'] ?? null)
+        ? ($auditData['port_from'] . ' to ' . $auditData['port_to'])
+        : ($auditData['port_from'] ?? $auditData['port_to'] ?? '');
 @endphp
 <!doctype html>
 <html lang="en">
@@ -30,23 +91,23 @@
                 <div class="h2">Integrated Pest Management</div>
                 <div class="h2">Audit Report</div>
             </div>
-            <div class="block vessel">Viking Mars (VOCX-MARS)</div>
+            <div class="block vessel">{{ $vesselLabel ?: '—' }}</div>
             <div class="block consultant">
                 <div class="label">IPM Consultant</div>
-                <div class="value">IPMConsultantName, IPMConsultantPosition</div>
+                <div class="value">{{ $consultantLine ?: '—' }}</div>
             </div>
             <div class="block onbehalf"><em>For and on behalf of Nutra Stat (UK) Limited</em></div>
             <div class="block period">
                 <div class="label">Audit Period</div>
-                <div class="value">Saturday, 7 Jun 2025 to Saturday, 14 Jun 2025</div>
+                <div class="value">{{ $auditPeriodLong }}</div>
             </div>
             <div class="block ports">
                 <div class="label">Audit Ports</div>
-                <div class="value">PortFromHere to PortToHere</div>
+                <div class="value">{{ $portsLine ?: '—' }}</div>
             </div>
             <div class="block prepared">
                 <div class="label">Prepared For</div>
-                <div class="value">PreparedForNameHere, PreparedForPositionHere</div>
+                <div class="value">{{ $preparedForLine ?: '—' }}</div>
             </div>
             <div class="footer-text" aria-label="Company details">
                 <div class="ft-row"><span class="k">Office Address:</span> Nutra Stat (UK) Limited, Hangar 7, Cecil Pashley Way, Shoreham Airport, Shoreham-by-Sea, West Sussex, BN43 5??</div>
@@ -62,8 +123,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -81,8 +142,8 @@
 
             <!-- Top-right meta -->
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <!-- Page content -->
@@ -108,45 +169,45 @@
                     <tbody>
                         <tr>
                             <td class="cell-label">Ship Name:</td>
-                            <td class="cell-value">Viking Mars</td>
+                            <td class="cell-value">{{ $shipName ?: '—' }}</td>
                             <td class="cell-label">Mnemonic:</td>
-                            <td class="cell-value">VOCX-MARS</td>
+                            <td class="cell-value">{{ $shipMnemonic ?: '—' }}</td>
                         </tr>
                         <tr>
                             <td class="cell-label">IPM Consultant Name:</td>
-                            <td class="cell-value">IPMConsultantName</td>
+                            <td class="cell-value">{{ $auditData['consultant'] ?? '—' }}</td>
                             <td class="cell-label">Position:</td>
-                            <td class="cell-value">IPMConsultantPosition</td>
+                            <td class="cell-value">{{ $auditData['consultant_position'] ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="cell-label">Prepared for:</td>
-                            <td class="cell-value">PreparedForNameHere</td>
+                            <td class="cell-value">{{ $auditData['pic_name'] ?? '—' }}</td>
                             <td class="cell-label">Position:</td>
-                            <td class="cell-value">PreparedForPositionHere</td>
+                            <td class="cell-value">{{ $auditData['pic_position'] ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="cell-label">Pest Control<br>Responsible Officer:</td>
-                            <td class="cell-value">EnterPCRONameHere</td>
+                            <td class="cell-value">{{ $auditData['pcro_name'] ?? '—' }}</td>
                             <td class="cell-label">Position:</td>
-                            <td class="cell-value">EnterPCROPositionHere</td>
+                            <td class="cell-value">{{ $auditData['pcro_position'] ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="cell-label">Pest Control Officer:</td>
-                            <td class="cell-value">EnterPCONameHere</td>
+                            <td class="cell-value">{{ $auditData['pco_name'] ?? '—' }}</td>
                             <td class="cell-label">Position:</td>
-                            <td class="cell-value">EnterPCOPositionHere</td>
+                            <td class="cell-value">{{ $auditData['pco_position'] ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="cell-label">Audit Date From:</td>
-                            <td class="cell-value">Saturday, 7 Jun 2025</td>
+                            <td class="cell-value">{{ $dateFromLong ?: '—' }}</td>
                             <td class="cell-label">Date To:</td>
-                            <td class="cell-value">Saturday, 14 Jun 2025</td>
+                            <td class="cell-value">{{ $dateToLong ?: '—' }}</td>
                         </tr>
                         <tr>
                             <td class="cell-label">Port From:</td>
-                            <td class="cell-value">PortFromHere</td>
+                            <td class="cell-value">{{ $auditData['port_from'] ?? '—' }}</td>
                             <td class="cell-label">Port To:</td>
-                            <td class="cell-value">PortToHere</td>
+                            <td class="cell-value">{{ $auditData['port_to'] ?? '—' }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -210,8 +271,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -401,8 +462,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -636,8 +697,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -868,8 +929,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -938,8 +999,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>{{ $auditData['ship_name'] ?? 'Viking Mars' }} ({{ $auditData['ship_mnemonic'] ?? 'VOCX-MARS' }})</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -1169,8 +1230,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -1390,8 +1451,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -1513,8 +1574,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">
@@ -1712,8 +1773,8 @@
             <img class="header" src="{{ $headerImg }}" alt="" />
 
             <div class="meta-top">
-                <div>IPM Audit Report: <b>Viking Mars (VOCX-MARS)</b></div>
-                <div>Audit Date: <b>Sat, 7 Jun 2025</b> to <b>Sat, 14 Jun 2025</b></div>
+                <div>IPM Audit Report: <b>{{ $vesselLabel ?: '—' }}</b></div>
+                <div>Audit Date: {!! $auditPeriodShort !!}</div>
             </div>
 
             <div class="content-area">

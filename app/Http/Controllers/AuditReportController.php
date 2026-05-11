@@ -149,11 +149,18 @@ class AuditReportController extends Controller
         $audit = Audit::with([
             'user',
             'ship.fleet.company',
-            'answers',
+            'answers.question',
         ])->findOrFail($id);
 
         // Index answers by question_id so we can attach to every question
         $answersByQuestion = $audit->answers->keyBy('question_id');
+
+        // Index answers by normalized question_text so the static report
+        // can resolve each hardcoded row to its submitted Yes/No/N/A.
+        $normalize = fn($s) => mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $s)));
+        $answersByText = $audit->answers
+            ->filter(fn($a) => $a->question?->question_text)
+            ->keyBy(fn($a) => $normalize($a->question->question_text));
 
         // Build the full departments → headings → subheadings → categories → questions tree
         // (matches the same shape used by the mobile app's GET /api/questions)
@@ -270,7 +277,7 @@ class AuditReportController extends Controller
             'reference'       => $audit->reference_number,
             'status'          => $audit->status,
             'score'           => $audit->score,
-            'submitted_at'    => $audit->created_at,
+            'submitted_at'    => $audit->submitted_at ?? $audit->created_at,
 
             'user_name'       => $audit->user
                 ? trim("{$audit->user->first_name} {$audit->user->last_name}")
@@ -283,40 +290,69 @@ class AuditReportController extends Controller
             'fleet_name'      => $audit->ship?->fleet?->name ?? 'N/A',
             'company_name'    => $audit->ship?->fleet?->company?->name ?? 'N/A',
 
+            'consultant'           => $audit->consultant,
+            'consultant_position'  => $audit->consultant_position,
+            'pcro_name'            => $audit->pcro_name,
+            'pcro_position'        => $audit->pcro_position,
+            'pco_name'             => $audit->pco_name,
+            'pco_position'         => $audit->pco_position,
+            'pic_name'             => $audit->pic_name,
+            'pic_position'         => $audit->pic_position,
+            'port_from'            => $audit->port_from,
+            'port_to'              => $audit->port_to,
+            'date_from'            => $audit->date_from,
+            'date_to'              => $audit->date_to,
+            'notes'                => $audit->notes,
+
             'total_answers'   => $answers->count(),
             'yes_count'       => $answers->where('answer', 'Yes')->count(),
             'no_count'        => $answers->where('answer', 'No')->count(),
             'na_count'        => $answers->where('answer', 'N/A')->count(),
 
             // Full hierarchy used by the report body
-            'departments'     => $departmentsTree,
-            'trap_locations'  => $trapLocations,
-            'efk_locations'   => $efkLocations,
+            'departments'             => $departmentsTree,
+            'trap_locations'          => $trapLocations,
+            'efk_locations'           => $efkLocations,
+            'answers_by_question_text'=> $answersByText,
         ];
     }
 
     private function emptyAuditData(): array
     {
         return [
-            'audit_id'       => null,
-            'reference'      => 'PREVIEW',
-            'status'         => 'preview',
-            'score'          => null,
-            'submitted_at'   => now(),
-            'user_name'      => 'N/A',
-            'user_email'     => '',
-            'user_title'     => '',
-            'ship_name'      => 'N/A',
-            'ship_mnemonic'  => '',
-            'fleet_name'     => 'N/A',
-            'company_name'   => 'N/A',
-            'total_answers'  => 0,
-            'yes_count'      => 0,
-            'no_count'       => 0,
-            'na_count'       => 0,
-            'departments'    => collect(),
-            'trap_locations' => collect(),
-            'efk_locations'  => collect(),
+            'audit_id'           => null,
+            'reference'          => 'PREVIEW',
+            'status'             => 'preview',
+            'score'              => null,
+            'submitted_at'       => now(),
+            'user_name'          => 'N/A',
+            'user_email'         => '',
+            'user_title'         => '',
+            'ship_name'          => 'N/A',
+            'ship_mnemonic'      => '',
+            'fleet_name'         => 'N/A',
+            'company_name'       => 'N/A',
+            'consultant'         => null,
+            'consultant_position'=> null,
+            'pcro_name'          => null,
+            'pcro_position'      => null,
+            'pco_name'           => null,
+            'pco_position'       => null,
+            'pic_name'           => null,
+            'pic_position'       => null,
+            'port_from'          => null,
+            'port_to'            => null,
+            'date_from'          => null,
+            'date_to'            => null,
+            'notes'              => null,
+            'total_answers'      => 0,
+            'yes_count'          => 0,
+            'no_count'           => 0,
+            'na_count'           => 0,
+            'departments'        => collect(),
+            'trap_locations'     => collect(),
+            'efk_locations'      => collect(),
+            'answers_by_question_text' => collect(),
         ];
     }
 
