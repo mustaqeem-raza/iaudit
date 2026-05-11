@@ -64,7 +64,7 @@ class AuditReportController extends Controller
     public function showReport($id = null)
     {
         $auditData = $id ? $this->buildAuditData($id) : $this->emptyAuditData();
-        return view('static-audit-pdf-report', compact('auditData'));
+        return view('audit-pdf-report', compact('auditData'));
     }
 
     public function showPDFReport($id = null)

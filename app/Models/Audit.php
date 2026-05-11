@@ -14,6 +14,26 @@ class Audit extends Model
         'reference_number',
         'status',
         'score',
+        'consultant',
+        'consultant_position',
+        'submitted_at',
+        'notes',
+        'pcro_name',
+        'pcro_position',
+        'pco_name',
+        'pco_position',
+        'pic_name',
+        'pic_position',
+        'port_from',
+        'port_to',
+        'date_from',
+        'date_to',
+    ];
+
+    protected $casts = [
+        'submitted_at' => 'datetime',
+        'date_from'    => 'date',
+        'date_to'      => 'date',
     ];
 
     public function user(): BelongsTo

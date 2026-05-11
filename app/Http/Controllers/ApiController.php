@@ -193,6 +193,20 @@ class ApiController extends Controller
 
         $validated = $request->validate([
             'ship_id'               => ['required', 'integer', 'exists:ships,id'],
+            'consultant'            => ['nullable', 'string', 'max:255'],
+            'consultant_position'   => ['nullable', 'string', 'max:255'],
+            'submitted_at'          => ['nullable', 'date'],
+            'notes'                 => ['nullable', 'string'],
+            'pcro_name'             => ['nullable', 'string', 'max:255'],
+            'pcro_position'         => ['nullable', 'string', 'max:255'],
+            'pco_name'              => ['nullable', 'string', 'max:255'],
+            'pco_position'          => ['nullable', 'string', 'max:255'],
+            'pic_name'              => ['nullable', 'string', 'max:255'],
+            'pic_position'          => ['nullable', 'string', 'max:255'],
+            'port_from'             => ['nullable', 'string', 'max:255'],
+            'port_to'               => ['nullable', 'string', 'max:255'],
+            'date_from'             => ['nullable', 'date'],
+            'date_to'               => ['nullable', 'date'],
             'answers'               => ['required', 'array', 'min:1'],
             'answers.*.question_id' => ['required', 'integer', 'exists:questions_iaudit,question_id'],
             'answers.*.answer'      => ['required', Rule::in(['Yes', 'No', 'N/A'])],
@@ -209,10 +223,24 @@ class ApiController extends Controller
         try {
             // One Audit record groups all answers for this submission
             $audit = \App\Models\Audit::create([
-                'user_id'          => $user->id,
-                'ship_id'          => $validated['ship_id'],
-                'reference_number' => 'AUD-' . strtoupper(uniqid()),
-                'status'           => 'completed',
+                'user_id'             => $user->id,
+                'ship_id'             => $validated['ship_id'],
+                'reference_number'    => 'AUD-' . strtoupper(uniqid()),
+                'status'              => 'completed',
+                'consultant'          => $validated['consultant'] ?? null,
+                'consultant_position' => $validated['consultant_position'] ?? null,
+                'submitted_at'        => $validated['submitted_at'] ?? null,
+                'notes'               => $validated['notes'] ?? null,
+                'pcro_name'           => $validated['pcro_name'] ?? null,
+                'pcro_position'       => $validated['pcro_position'] ?? null,
+                'pco_name'            => $validated['pco_name'] ?? null,
+                'pco_position'        => $validated['pco_position'] ?? null,
+                'pic_name'            => $validated['pic_name'] ?? null,
+                'pic_position'        => $validated['pic_position'] ?? null,
+                'port_from'           => $validated['port_from'] ?? null,
+                'port_to'             => $validated['port_to'] ?? null,
+                'date_from'           => $validated['date_from'] ?? null,
+                'date_to'             => $validated['date_to'] ?? null,
             ]);
 
             foreach ($validated['answers'] as $index => $answerData) {

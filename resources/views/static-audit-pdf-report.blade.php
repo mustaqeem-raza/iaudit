@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Integrated Pest Management Audit Report - Cover</title>
+    <title>Integrated Pest Management Audit Report</title>
     <style>
         {!! file_get_contents(public_path('css/pdf-style.css')) !!}
 
