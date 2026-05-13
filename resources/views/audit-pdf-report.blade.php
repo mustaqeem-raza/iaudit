@@ -5,28 +5,7 @@
     $auditData = $auditData ?? [];
     $answersByText = $auditData['answers_by_question_text'] ?? collect();
 
-    // Look up the submitted answer for a question by its text. Returns a
-    // ['cls' => ..., 'text' => ...] pair the doc-tables can render. When no
-    // answer exists (preview / unanswered question) we fall back to a
-    // neutral em-dash so the static template stays presentable.
-    $A = function ($questionText) use ($answersByText) {
-        $key = mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $questionText)));
-        $a = $answersByText instanceof \Illuminate\Support\Collection
-            ? $answersByText->get($key)
-            : ($answersByText[$key] ?? null);
 
-        if (!$a) {
-            return ['cls' => 'doc-na', 'text' => '—'];
-        }
-
-        $cls = match ($a->answer) {
-            'No'  => 'doc-no',
-            'N/A' => 'doc-na',
-            default => 'doc-yes',
-        };
-
-        return ['cls' => $cls, 'text' => $a->answer];
-    };
 
     // Helpers for header/cover metadata. Format the dates the way the static
     // template displays them and gracefully fall back when data is missing.
@@ -39,9 +18,12 @@
         try { return \Carbon\Carbon::parse($d)->format('D, j M Y'); } catch (\Throwable $e) { return ''; }
     };
 
-    $shipName     = $auditData['ship_name']     ?? '';
-    $shipMnemonic = $auditData['ship_mnemonic'] ?? '';
-    $vesselLabel  = trim($shipName . ($shipMnemonic ? " ({$shipMnemonic})" : ''));
+    $shipName      = $auditData['ship_name']      ?? '';
+    $shipMnemonic  = $auditData['ship_mnemonic']  ?? '';
+    $fleetMnemonic = $auditData['fleet_mnemonic'] ?? '';
+    // e.g. "Viking Mars (VOCX-MARS)" — fleet.mnemonic-ship.mnemonic
+    $vesselMnemonic = trim(implode('-', array_filter([$fleetMnemonic, $shipMnemonic])));
+    $vesselLabel    = trim($shipName . ($vesselMnemonic ? " ({$vesselMnemonic})" : ''));
 
     $dateFromLong  = $fmtLong($auditData['date_from']  ?? null);
     $dateToLong    = $fmtLong($auditData['date_to']    ?? null);
@@ -171,7 +153,7 @@
                             <td class="cell-label">Ship Name:</td>
                             <td class="cell-value">{{ $shipName ?: '—' }}</td>
                             <td class="cell-label">Mnemonic:</td>
-                            <td class="cell-value">{{ $shipMnemonic ?: '—' }}</td>
+                            <td class="cell-value">{{ $vesselMnemonic ?: '—' }}</td>
                         </tr>
                         <tr>
                             <td class="cell-label">IPM Consultant Name:</td>
@@ -1694,7 +1676,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Construction</td>
                             <td class="doc-q">Do all rat guards meet the minimum construction requirements?</td>
-                            <td class="doc-no">No</td>
+                            <td class="doc-yes">Yes</td>
                         </tr>
 
                         <tr class="doc-section">

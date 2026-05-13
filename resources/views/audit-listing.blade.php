@@ -108,7 +108,6 @@
                                 <th>User</th>
                                 <th>Ship</th>
                                 <th>Status</th>
-                                <th>Score</th>
                                 <th>Date</th>
                                 <th class="no-sort">Actions</th>
                             </tr>
@@ -139,7 +138,6 @@
                                             {{ ucfirst($audit->status) }}
                                         </span>
                                     </td>
-                                    <td>{{ $audit->score ?? '—' }}</td>
                                     <td data-order="{{ $audit->created_at->timestamp }}">
                                         {{ $audit->created_at->format('Y-m-d H:i') }}
                                     </td>

@@ -21,7 +21,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Audit specific routes (with ID)
-    Route::get('/audit/static/report', [AuditReportController::class, 'staticReport'])->name('audit.report.static');
+    Route::get('/static-report', [AuditReportController::class, 'staticReport'])->name('audit.report.static');
     Route::get('/audit/{id}/report', [AuditReportController::class, 'showReport'])->name('audit.report.show');
     Route::get('/audit/{id}/pdf', [AuditReportController::class, 'showPDFReport'])->name('audit.report.pdf.show');
     Route::get('/audit/{id}/download', [AuditReportController::class, 'downloadPdf'])->name('audit.download');

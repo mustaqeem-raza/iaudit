@@ -288,6 +288,7 @@ class AuditReportController extends Controller
             'ship_name'       => $audit->ship?->name ?? 'N/A',
             'ship_mnemonic'   => $audit->ship?->mnemonic ?? '',
             'fleet_name'      => $audit->ship?->fleet?->name ?? 'N/A',
+            'fleet_mnemonic'  => $audit->ship?->fleet?->mnemonic ?? '',
             'company_name'    => $audit->ship?->fleet?->company?->name ?? 'N/A',
 
             'consultant'           => $audit->consultant,
@@ -331,6 +332,7 @@ class AuditReportController extends Controller
             'ship_name'          => 'N/A',
             'ship_mnemonic'      => '',
             'fleet_name'         => 'N/A',
+            'fleet_mnemonic'     => '',
             'company_name'       => 'N/A',
             'consultant'         => null,
             'consultant_position'=> null,
