@@ -70,7 +70,7 @@ class AuditReportController extends Controller
     public function showPDFReport($id = null)
     {
         $auditData = $id ? $this->buildAuditData($id) : $this->emptyAuditData();
-        $html = view('static-audit-pdf-report', compact('auditData'))->render();
+        $html = view('audit-pdf-report', compact('auditData'))->render();
 
         $pdf = $this->renderPdf($html);
 
@@ -157,7 +157,17 @@ class AuditReportController extends Controller
 
         // Index answers by normalized question_text so the static report
         // can resolve each hardcoded row to its submitted Yes/No/N/A.
-        $normalize = fn($s) => mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $s)));
+        // Decode HTML entities + curly quotes so blade text like
+        // "folder &amp; available" matches DB "folder & available".
+        $normalize = function ($s) {
+            $s = html_entity_decode((string) $s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $s = strtr($s, [
+                "\u{2018}" => "'", "\u{2019}" => "'",
+                "\u{201C}" => '"', "\u{201D}" => '"',
+                "\u{2013}" => '-', "\u{2014}" => '-',
+            ]);
+            return mb_strtolower(trim(preg_replace('/\s+/u', ' ', $s)));
+        };
         $answersByText = $audit->answers
             ->filter(fn($a) => $a->question?->question_text)
             ->keyBy(fn($a) => $normalize($a->question->question_text));

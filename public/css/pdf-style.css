@@ -469,7 +469,8 @@ body {
 .doc-q {
     font-weight: 600;
 }
-
+.doc-na,
+.doc-no,
 .doc-yes {
     text-align: right;
     font-weight: 800;

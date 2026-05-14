@@ -5,6 +5,26 @@
     $auditData = $auditData ?? [];
     $answersByText = $auditData['answers_by_question_text'] ?? collect();
 
+    // Resolves a hardcoded report question to its submitted answer cell.
+    // Matches by normalized text against $answersByText (built in the controller).
+    // Falls back to a dash cell when there is no matching answer yet.
+    $answerCell = function ($qText) use ($answersByText) {
+        $s = html_entity_decode((string) $qText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $s = strtr($s, [
+            "\u{2018}" => "'", "\u{2019}" => "'",
+            "\u{201C}" => '"', "\u{201D}" => '"',
+            "\u{2013}" => '-', "\u{2014}" => '-',
+        ]);
+        $key = mb_strtolower(trim(preg_replace('/\s+/u', ' ', $s)));
+
+        $answer = optional($answersByText->get($key))->answer;
+        if (!$answer) {
+            return '<td class="doc-na">&mdash;</td>';
+        }
+        $class = $answer === 'Yes' ? 'doc-yes' : ($answer === 'No' ? 'doc-no' : 'doc-na');
+        return '<td class="' . $class . '">' . e($answer) . '</td>';
+    };
+
 
 
     // Helpers for header/cover metadata. Format the dates the way the static
@@ -356,12 +376,12 @@
                         <tr class="doc-row">
                             <td class="doc-item">Hardcopy</td>
                             <td class="doc-q">Are all folders available for inspection?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all folders available for inspection?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Electronic</td>
                             <td class="doc-q">Are all folders available for inspection?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all folders available for inspection?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -370,37 +390,37 @@
                         <tr class="doc-row">
                             <td class="doc-item">Completed<br>Logs</td>
                             <td class="doc-q">Is the folder complete &amp; available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the folder complete &amp; available?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Active Ins. Time</td>
                             <td class="doc-q">Are the log inspection times accurate and not rounded?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the log inspection times accurate and not rounded?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Active Ins. Pest</td>
                             <td class="doc-q">Do the inspections contain reported pests and raising issues?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Do the inspections contain reported pests and raising issues?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Deliveries Time</td>
                             <td class="doc-q">Are the inspection times accurate?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the inspection times accurate?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Delvry. Generic</td>
                             <td class="doc-q">Are the inspection details free from ‘generic’ keywords</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the inspection details free from ‘generic’ keywords') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Treatment Time</td>
                             <td class="doc-q">Are the inspection times accurate?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the inspection times accurate?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Treat. Follow Up</td>
                             <td class="doc-q">Are all details being accurately entered, and are treatments being followed up?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all details being accurately entered, and are treatments being followed up?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -409,7 +429,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Training</td>
                             <td class="doc-q">Is the folder complete &amp; available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the folder complete &amp; available?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -418,7 +438,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Bedbug Logs</td>
                             <td class="doc-q">Are the folders complete &amp; available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the folders complete &amp; available?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -427,7 +447,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Management</td>
                             <td class="doc-q">Is the folder complete &amp; available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the folder complete &amp; available?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -461,7 +481,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">MSDS</td>
                             <td class="doc-q">Are the Safety Data Sheets complete and available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the Safety Data Sheets complete and available?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -470,17 +490,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Log Folder</td>
                             <td class="doc-q">Is the folder and the current IPM Log available for inspection?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the folder and the current IPM Log available for inspection?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Current Log</td>
                             <td class="doc-q">Is the current IPM Log available for inspection?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the current IPM Log available for inspection?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Log Maintained</td>
                             <td class="doc-q">Is the IPM Log being maintained, and is it not post-dated?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the IPM Log being maintained, and is it not post-dated?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -489,12 +509,12 @@
                         <tr class="doc-row">
                             <td class="doc-item">IPM Plan Folder</td>
                             <td class="doc-q">Is the folder available for inspection?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the folder available for inspection?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Maintained</td>
                             <td class="doc-q">Is the folder being maintained with no additional files or folders?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the folder being maintained with no additional files or folders?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -503,12 +523,12 @@
                         <tr class="doc-row">
                             <td class="doc-item">Public Health</td>
                             <td class="doc-q">Is the folder available for inspection?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the folder available for inspection?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Maintained</td>
                             <td class="doc-q">Is the folder being maintained with no additional files or folders?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the folder being maintained with no additional files or folders?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -517,17 +537,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Advisories</td>
                             <td class="doc-q">Are all advisories filed &amp; available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all advisories filed &amp; available?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Audit Reports</td>
                             <td class="doc-q">Are all audit reports filed &amp; available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all audit reports filed &amp; available?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Log Responses</td>
                             <td class="doc-q">Are log responses filed &amp; available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are log responses filed &amp; available?') !!}
                         </tr>
 
                         <!-- Blank rows (as in PDF) -->
@@ -594,22 +614,22 @@
                         <tr class="doc-row">
                             <td class="doc-item">Specific</td>
                             <td class="doc-q">Is there a designated pest locker only for pest control items?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there a designated pest locker only for pest control items?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Location</td>
                             <td class="doc-q">Is the pest locker not situated within a food storage or food production area?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the pest locker not situated within a food storage or food production area?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Locked</td>
                             <td class="doc-q">Was the pest control locker secure and locked at the time of the audit?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Was the pest control locker secure and locked at the time of the audit?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Access</td>
                             <td class="doc-q">Is there restricted access to the pest control locker key?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there restricted access to the pest control locker key?') !!}
                         </tr>
 
                         <tr class="doc-subsection">
@@ -618,37 +638,37 @@
                         <tr class="doc-row">
                             <td class="doc-item">Outside</td>
                             <td class="doc-q">Is the pest locker correctly signed as a pest control store?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the pest locker correctly signed as a pest control store?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Hazardous</td>
                             <td class="doc-q">Is there a hazardous sign outside the pest control store?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there a hazardous sign outside the pest control store?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Mixing Notice</td>
                             <td class="doc-q">Does the pest locker have a mixing area notice?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Does the pest locker have a mixing area notice?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Mixing Sign</td>
                             <td class="doc-q">Is there a mixing sign in the designated mixing area?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there a mixing sign in the designated mixing area?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Restriction</td>
                             <td class="doc-q">Are chemical application notices ready and available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are chemical application notices ready and available?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Oa2ki Fact</td>
                             <td class="doc-q">Is the Oa2ki Powder/ Diatomaceous Earth Fact Sheet displayed?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the Oa2ki Powder/ Diatomaceous Earth Fact Sheet displayed?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Matrix</td>
                             <td class="doc-q">Is the chemical/insect notice available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the chemical/insect notice available?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -657,12 +677,12 @@
                         <tr class="doc-row">
                             <td class="doc-item">Out/In Locker</td>
                             <td class="doc-q">Are all available SDS sheets available inside or outside the pest control locker?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all available SDS sheets available inside or outside the pest control locker?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Hardcopy<br>Folder</td>
                             <td class="doc-q">Are all available SDS sheets available inside the hardcopy folder?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all available SDS sheets available inside the hardcopy folder?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -697,7 +717,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Medical</td>
                             <td class="doc-q">Are all available SDS sheets available inside the medical department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all available SDS sheets available inside the medical department?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -706,37 +726,37 @@
                         <tr class="doc-row">
                             <td class="doc-item">Levels</td>
                             <td class="doc-q">Are the equipment levels being accurately detailed in the IPM log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the equipment levels being accurately detailed in the IPM log?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Maintained</td>
                             <td class="doc-q">Is the large sprayer being correctly maintained?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the large sprayer being correctly maintained?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Yellow Fan Jet</td>
                             <td class="doc-q">Is there a yellow fan jet tip available to service the sprayer?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there a yellow fan jet tip available to service the sprayer?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Pre-Filter</td>
                             <td class="doc-q">Is there a pre-filter for the lance-end available to service the sprayer?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there a pre-filter for the lance-end available to service the sprayer?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Seal Kit</td>
                             <td class="doc-q">Is there a seal kit available for the sprayer?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there a seal kit available for the sprayer?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Empty</td>
                             <td class="doc-q">Is the sprayer empty?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the sprayer empty?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Decompressed</td>
                             <td class="doc-q">Is the sprayer depressurised?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the sprayer depressurised?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -745,22 +765,22 @@
                         <tr class="doc-row">
                             <td class="doc-item">Levels</td>
                             <td class="doc-q">Are the equipment levels being accurately detailed in the IPM log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the equipment levels being accurately detailed in the IPM log?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Maintenance</td>
                             <td class="doc-q">Is the small sprayer being correctly maintained?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the small sprayer being correctly maintained?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Empty</td>
                             <td class="doc-q">Is the sprayer empty?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the sprayer empty?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Decompressed</td>
                             <td class="doc-q">Is the sprayer depressurised?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the sprayer depressurised?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -769,22 +789,22 @@
                         <tr class="doc-row">
                             <td class="doc-item">Levels</td>
                             <td class="doc-q">Are the equipment levels being accurately detailed in the IPM log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the equipment levels being accurately detailed in the IPM log?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Maintenance</td>
                             <td class="doc-q">Is the fogger being maintained?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the fogger being maintained?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Empty</td>
                             <td class="doc-q">Is the fogger empty?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the fogger empty?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Base</td>
                             <td class="doc-q">Is the base connected?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the base connected?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -793,17 +813,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Levels</td>
                             <td class="doc-q">Are the equipment levels being accurately detailed in the IPM log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the equipment levels being accurately detailed in the IPM log?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Maintenance</td>
                             <td class="doc-q">Is the gel gun being maintained?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the gel gun being maintained?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Needles</td>
                             <td class="doc-q">Are there sufficient replacement needles for the gel gun?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there sufficient replacement needles for the gel gun?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -812,12 +832,12 @@
                         <tr class="doc-row">
                             <td class="doc-item">Maintained</td>
                             <td class="doc-q">Is the compression duster being well-maintained?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the compression duster being well-maintained?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Wet</td>
                             <td class="doc-q">Is the compression duster dry?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the compression duster dry?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -826,12 +846,12 @@
                         <tr class="doc-row">
                             <td class="doc-item">Maintained</td>
                             <td class="doc-q">Is the compression duster being well-maintained?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the compression duster being well-maintained?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Storage Cap</td>
                             <td class="doc-q">Is the storage cap on the duster?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the storage cap on the duster?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -840,22 +860,22 @@
                         <tr class="doc-row">
                             <td class="doc-item">Levels</td>
                             <td class="doc-q">Are adequate stock levels of personal protective equipment and filters available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are adequate stock levels of personal protective equipment and filters available?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Compliance</td>
                             <td class="doc-q">Is the PPE compliant with the Nutrastat IPM Plan?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the PPE compliant with the Nutrastat IPM Plan?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Maintained</td>
                             <td class="doc-q">Is PPE clean and well-maintained?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is PPE clean and well-maintained?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Separate</td>
                             <td class="doc-q">Is the PPE being stored separately from the chemicals?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the PPE being stored separately from the chemicals?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -864,17 +884,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Levels: Rat</td>
                             <td class="doc-q">Are adequate stock levels available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are adequate stock levels available?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Levels: Mouse</td>
                             <td class="doc-q">Are adequate stock levels available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are adequate stock levels available?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Attractant</td>
                             <td class="doc-q">Is there a tube of rodent attractant in the pest locker, and is it in date?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there a tube of rodent attractant in the pest locker, and is it in date?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -883,17 +903,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Chemicals</td>
                             <td class="doc-q">Are reasonable chemical stock levels being maintained as per the IPM Log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are reasonable chemical stock levels being maintained as per the IPM Log?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Compliance</td>
                             <td class="doc-q">Are there no differing chemicals compared with the IPM Plan?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there no differing chemicals compared with the IPM Plan?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Expired</td>
                             <td class="doc-q">Are all chemicals up-to-date and not expired?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all chemicals up-to-date and not expired?') !!}
                         </tr>
 
                     </tbody>
@@ -928,32 +948,32 @@
                         <tr class="doc-row">
                             <td class="doc-item">UV Tubes</td>
                             <td class="doc-q">Are there sufficient Electric Fly Killer Ultraviolet tubes for all fly killers?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there sufficient Electric Fly Killer Ultraviolet tubes for all fly killers?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Glue Boards</td>
                             <td class="doc-q">Are there sufficient Electric Fly Killer replacement glue boards for all fly killers?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there sufficient Electric Fly Killer replacement glue boards for all fly killers?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Silent Sentry</td>
                             <td class="doc-q">Are most Silent Sentry boxes deployed around the departments?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are most Silent Sentry boxes deployed around the departments?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Standard Trap</td>
                             <td class="doc-q">Are there sufficient standard cockroach traps?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there sufficient standard cockroach traps?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Monitor Trap</td>
                             <td class="doc-q">Are there sufficient monitor cockroach traps?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there sufficient monitor cockroach traps?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Bedbug Trap</td>
                             <td class="doc-q">Are there sufficient bedbug traps?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there sufficient bedbug traps?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -962,7 +982,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Transportation</td>
                             <td class="doc-q">Is a portable, coloured container labelled ‘Poison’ available?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is a portable, coloured container labelled ‘Poison’ available?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -1013,32 +1033,32 @@
                         <tr class="doc-row">
                             <td class="doc-item">Cockroaches</td>
                             <td class="doc-q">No cockroaches were seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('No cockroaches were seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Flies</td>
                             <td class="doc-q">No flies were seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('No flies were seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Bedbugs</td>
                             <td class="doc-q">No bedbugs were seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('No bedbugs were seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">SPI</td>
                             <td class="doc-q">No Stored Product Insects (SPI) were seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('No Stored Product Insects (SPI) were seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Rodents</td>
                             <td class="doc-q">No rodents (rats or mice) were seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('No rodents (rats or mice) were seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Other pests</td>
                             <td class="doc-q">No other pest types were seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('No other pest types were seen in this department?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -1087,62 +1107,62 @@
                         <tr class="doc-row">
                             <td class="doc-item">Assembly</td>
                             <td class="doc-q">The traps assembled correctly?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('The traps assembled correctly?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Ramps</td>
                             <td class="doc-q">The ramps folded in and were not pulled out?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('The ramps folded in and were not pulled out?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Location</td>
                             <td class="doc-q">Are the monitoring traps correctly placed according to the IPM Log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the monitoring traps correctly placed according to the IPM Log?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Type</td>
                             <td class="doc-q">Are the correct type of traps used (i.e. standard or monitor) as per the IPM Log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the correct type of traps used (i.e. standard or monitor) as per the IPM Log?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Silicon Paper</td>
                             <td class="doc-q">Is the silicon release paper on the traps being removed?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the silicon release paper on the traps being removed?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Condition</td>
                             <td class="doc-q">Are the traps in good condition, not wet, not soiled, and not crushed?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the traps in good condition, not wet, not soiled, and not crushed?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Deck</td>
                             <td class="doc-q">Are the traps correctly placed on the deck?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the traps correctly placed on the deck?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Washdown</td>
                             <td class="doc-q">Are they being lifted before washdown, and the traps remaining dry?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are they being lifted before washdown, and the traps remaining dry?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Vertical</td>
                             <td class="doc-q">No traps were positioned vertically?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('No traps were positioned vertically?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Equipment</td>
                             <td class="doc-q">No traps were positioned inside equipment, such as the cleaning locker?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('No traps were positioned inside equipment, such as the cleaning locker?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Reusing Traps</td>
                             <td class="doc-q">Not using old traps</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Not using old traps') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Nutrasat Traps</td>
                             <td class="doc-q">All traps are Nutrasat branded, not any other types?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('All traps are Nutrasat branded, not any other types?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -1151,42 +1171,42 @@
                         <tr class="doc-row">
                             <td class="doc-item">Labels</td>
                             <td class="doc-q">Are the traps correctly labelled?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the traps correctly labelled?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Clean</td>
                             <td class="doc-q">Are they clean and well-maintained?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are they clean and well-maintained?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Damaged</td>
                             <td class="doc-q">Are they all undamaged?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are they all undamaged?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Trap Type</td>
                             <td class="doc-q">Are standard monitoring traps always being used in the Silent Sentry?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are standard monitoring traps always being used in the Silent Sentry?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Plastic Film</td>
                             <td class="doc-q">Has all the manufacturer’s plastic film wrap been removed from all Silent Sentries?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Has all the manufacturer’s plastic film wrap been removed from all Silent Sentries?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Base Plate</td>
                             <td class="doc-q">Are all internal base plates correctly oriented?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all internal base plates correctly oriented?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Soiled/Dusty</td>
                             <td class="doc-q">Were there no soiled or dusty traps?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were there no soiled or dusty traps?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Hinge Pins</td>
                             <td class="doc-q">The baseplates were not on the hinge pins</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('The baseplates were not on the hinge pins') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -1195,7 +1215,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Weekly Inspect</td>
                             <td class="doc-q">Were all traps inspected weekly as per the current IPM Log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were all traps inspected weekly as per the current IPM Log?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -1229,42 +1249,42 @@
                         <tr class="doc-row">
                             <td class="doc-item">IPM Period Start</td>
                             <td class="doc-q">It is not the start of the IPM Period</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('It is not the start of the IPM Period') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Inspect Dates</td>
                             <td class="doc-q">The correct Inspection dates were detailed correctly, following the IPM Log?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('The correct Inspection dates were detailed correctly, following the IPM Log?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Missing Traps</td>
                             <td class="doc-q">Were there no traps that were missing?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were there no traps that were missing?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Placement Date</td>
                             <td class="doc-q">Were the placement dates correct and detailed</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were the placement dates correct and detailed') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Month 3-Chars</td>
                             <td class="doc-q">Were the months written in 3-character format (i.e. Apr, May, Dec)?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were the months written in 3-character format (i.e. Apr, May, Dec)?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Accountability</td>
                             <td class="doc-q">Is the person’s initials/signature being applied during inspection?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the person’s initials/signature being applied during inspection?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Weekly Count</td>
                             <td class="doc-q">The traps are inspected weekly and completed with Adults, Nymphs, and Other?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('The traps are inspected weekly and completed with Adults, Nymphs, and Other?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Post-Dated</td>
                             <td class="doc-q">There were no post-dated traps?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('There were no post-dated traps?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -1359,7 +1379,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Quantity</td>
                             <td class="doc-q">Are there sufficient fly killers in the area to prevent flying insect issues?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there sufficient fly killers in the area to prevent flying insect issues?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -1368,17 +1388,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Type</td>
                             <td class="doc-q">There are no zapper-type fly killers installed on the ship.</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('There are no zapper-type fly killers installed on the ship.') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Food Area</td>
                             <td class="doc-q">Are there no zapper-type fly killers installed in food areas?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there no zapper-type fly killers installed in food areas?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Substitute</td>
                             <td class="doc-q">Are all zappers acceptable?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all zappers acceptable?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -1387,17 +1407,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Power</td>
                             <td class="doc-q">Are all fly killers always powered and working?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all fly killers always powered and working?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Permanent</td>
                             <td class="doc-q">Are all fly killers not working from the electric light switch circuit?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all fly killers not working from the electric light switch circuit?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Wiring</td>
                             <td class="doc-q">Are the wires powering the fly killer correctly installed and in conduit?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the wires powering the fly killer correctly installed and in conduit?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -1406,17 +1426,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Clean</td>
                             <td class="doc-q">Are the fly killers clean?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the fly killers clean?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Damaged</td>
                             <td class="doc-q">Are all fly killers in good condition and not damaged?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all fly killers in good condition and not damaged?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Missing Parts</td>
                             <td class="doc-q">Are there any missing parts on the fly killers?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are there any missing parts on the fly killers?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -1454,22 +1474,22 @@
                         <tr class="doc-row">
                             <td class="doc-item">Changed</td>
                             <td class="doc-q">Are all UV tubes being changed as per the IPM Plan?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all UV tubes being changed as per the IPM Plan?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Working</td>
                             <td class="doc-q">Are all UV Tubes working when the power is on?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all UV Tubes working when the power is on?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Shatterproof</td>
                             <td class="doc-q">Are the UV tubes shatter-resistant, covered in special plastic?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the UV tubes shatter-resistant, covered in special plastic?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">LED Orientation</td>
                             <td class="doc-q">Are the UV tubes installed such that they point out to maximise attraction?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the UV tubes installed such that they point out to maximise attraction?') !!}
                         </tr>
 
                         <tr class="doc-subsection">
@@ -1478,22 +1498,22 @@
                         <tr class="doc-row">
                             <td class="doc-item">Changed</td>
                             <td class="doc-q">Are all the glue boards being changed as per the IPM Plan?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all the glue boards being changed as per the IPM Plan?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Type</td>
                             <td class="doc-q">Are the glue boards of the correct type for each fly killer?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the glue boards of the correct type for each fly killer?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Expiry Date</td>
                             <td class="doc-q">Is the next expiry date being written on the back of the glue boards?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is the next expiry date being written on the back of the glue boards?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Missing</td>
                             <td class="doc-q">Do all fly killers have glue boards installed?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Do all fly killers have glue boards installed?') !!}
                         </tr>
 
                         <tr class="doc-subsection">
@@ -1502,17 +1522,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Labels</td>
                             <td class="doc-q">Are the maintenance labels in place on each fly killer?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the maintenance labels in place on each fly killer?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Completed</td>
                             <td class="doc-q">Are the labels being completed as per the IPM Plan?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the labels being completed as per the IPM Plan?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Future Dates</td>
                             <td class="doc-q">Are the maintenance labels correctly completed with no futuristic dates?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are the maintenance labels correctly completed with no futuristic dates?') !!}
                         </tr>
 
                         <tr class="doc-subsection">
@@ -1521,22 +1541,22 @@
                         <tr class="doc-row">
                             <td class="doc-item">Food</td>
                             <td class="doc-q">Not located above food?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Not located above food?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Equipment</td>
                             <td class="doc-q">Not located above clean equipment, utensils, serviettes, and single-use items?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Not located above clean equipment, utensils, serviettes, and single-use items?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Clean Surface</td>
                             <td class="doc-q">Not located over food or clean surfaces within 150mm of either side of the fly killers?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Not located over food or clean surfaces within 150mm of either side of the fly killers?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Siting</td>
                             <td class="doc-q">Are all fly killers in the correct siting location as required by Public Health?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all fly killers in the correct siting location as required by Public Health?') !!}
                         </tr>
 
                     </tbody>
@@ -1588,32 +1608,32 @@
                         <tr class="doc-row">
                             <td class="doc-item">Cockroaches</td>
                             <td class="doc-q">Were there no cockroaches seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were there no cockroaches seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Flies</td>
                             <td class="doc-q">Were there no flies seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were there no flies seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Bedbugs</td>
                             <td class="doc-q">Were there no bedbugs seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were there no bedbugs seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">SPI</td>
                             <td class="doc-q">Were there no Stored Product Insects (SPI) seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were there no Stored Product Insects (SPI) seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Rodents</td>
                             <td class="doc-q">Were there no rodents (rats or mice) seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were there no rodents (rats or mice) seen in this department?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Other pests</td>
                             <td class="doc-q">Were there no other pest types seen in this department?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Were there no other pest types seen in this department?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -1676,7 +1696,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Construction</td>
                             <td class="doc-q">Do all rat guards meet the minimum construction requirements?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Do all rat guards meet the minimum construction requirements?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -1685,7 +1705,7 @@
                         <tr class="doc-row">
                             <td class="doc-item">Count</td>
                             <td class="doc-q">Is there a minimum of one rat guard installed per line?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Is there a minimum of one rat guard installed per line?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -1694,12 +1714,12 @@
                         <tr class="doc-row">
                             <td class="doc-item">Arrival</td>
                             <td class="doc-q">All rat guards installed within an hour of arrival?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('All rat guards installed within an hour of arrival?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Departure</td>
                             <td class="doc-q">All rat guards not removed earlier than an hour before departure?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('All rat guards not removed earlier than an hour before departure?') !!}
                         </tr>
 
                         <tr class="doc-section">
@@ -1708,37 +1728,37 @@
                         <tr class="doc-row">
                             <td class="doc-item">Gaps</td>
                             <td class="doc-q">All rat guards placed with no gaps to allow rodent ingress?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('All rat guards placed with no gaps to allow rodent ingress?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Distance</td>
                             <td class="doc-q">Rat guards not placed within 2 metres of the dockside, considering personnel safety?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Rat guards not placed within 2 metres of the dockside, considering personnel safety?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Angled</td>
                             <td class="doc-q">Rat guards not placed at too shallow an angle?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Rat guards not placed at too shallow an angle?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Hanging</td>
                             <td class="doc-q">Are all rat guards securely tied and not hanging?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all rat guards securely tied and not hanging?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Orientation</td>
                             <td class="doc-q">Are all the oriented rat guards not deployed in the correct direction?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all the oriented rat guards not deployed in the correct direction?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Ground Height</td>
                             <td class="doc-q">Are all rat guards not installed too low on the deck?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all rat guards not installed too low on the deck?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Securing Line</td>
                             <td class="doc-q">Are all rat guards securing lines installed at the back of the rat guard?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all rat guards securing lines installed at the back of the rat guard?') !!}
                         </tr>
                     </tbody>
                 </table>
@@ -1775,17 +1795,17 @@
                         <tr class="doc-row">
                             <td class="doc-item">Weighted</td>
                             <td class="doc-q">Are all shipside rat guards weighted as per the IPM Plan?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all shipside rat guards weighted as per the IPM Plan?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Distance</td>
                             <td class="doc-q">Are all shipside rat guards not placed too close to the ship?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all shipside rat guards not placed too close to the ship?') !!}
                         </tr>
                         <tr class="doc-row">
                             <td class="doc-item">Openings</td>
                             <td class="doc-q">Are all shipside rat guards installed before the ship rope openings?</td>
-                            <td class="doc-yes">Yes</td>
+                            {!! $answerCell('Are all shipside rat guards installed before the ship rope openings?') !!}
                         </tr>
                     </tbody>
                 </table>
