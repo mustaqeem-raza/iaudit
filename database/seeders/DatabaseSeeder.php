@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             CrtTrapLocationSeeder::class,
             OtherCrtIAuditSeeder::class,
             OtherEfkIAuditSeeder::class,
+            IpmEfkIAuditSeeder::class,
         ]);
     }
 }

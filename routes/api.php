@@ -17,4 +17,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/efk-locations', [ApiController::class, 'efkLocations']);
     Route::get('/other-crt-locations', [ApiController::class, 'otherCrtLocations']);
     Route::get('/other-efk-locations', [ApiController::class, 'otherEfkLocations']);
+    Route::get('/ipm-efk-locations', [ApiController::class, 'ipmEfkLocations']);
 });

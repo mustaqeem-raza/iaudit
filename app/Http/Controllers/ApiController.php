@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\CrtTrapLocationIaudit;
 use App\Models\DepartmentIaudit;
 use App\Models\EfkIAudit;
+use App\Models\IpmEfkIAudit;
 use App\Models\OtherCrtIAudit;
 use App\Models\OtherEfkIAudit;
 use Illuminate\Http\Request;
@@ -412,6 +413,79 @@ class ApiController extends Controller
 
         return response()->json([
             'success' => true,
+            'data'    => $result,
+        ]);
+    }
+
+    public function ipmEfkLocations()
+    {
+        $ships = IpmEfkIAudit::select(
+            'ship_name',
+            'mnemonic_both',
+            'mnemonic_fleet',
+            'mnemonic_ship',
+            'efk_type',
+            'deck_no',
+            'department',
+            'area',
+            'location',
+            'install_date',
+            'type_uvt',
+            'count_type'
+        )->get()
+            ->groupBy('ship_name');
+
+        $result = $ships->map(function ($shipRows, $shipName) {
+            $first = $shipRows->first();
+
+            // Group by department
+            $departments = $shipRows->groupBy('department')->map(function ($deptRows, $deptName) {
+
+                // Group by deck
+                $decks = $deptRows->groupBy('deck_no')->map(function ($deckRows, $deckName) {
+
+                    // Group by area
+                    $areas = $deckRows->groupBy('area')->map(function ($areaRows, $areaName) {
+                        $locations = $areaRows->map(function ($row) {
+                            return [
+                                'location'     => $row->location,
+                                'efk_type'     => $row->efk_type,
+                                'type_uvt'     => $row->type_uvt,
+                                'count_type'   => $row->count_type,
+                                'install_date' => $row->install_date,
+                            ];
+                        })->values();
+
+                        return [
+                            'area'      => $areaName,
+                            'locations' => $locations,
+                        ];
+                    })->values();
+
+                    return [
+                        'deck'  => $deckName,
+                        'areas' => $areas,
+                    ];
+                })->values();
+
+                return [
+                    'department' => $deptName,
+                    'decks'      => $decks,
+                ];
+            })->values();
+
+            return [
+                'ship_name'      => $shipName,
+                'mnemonic_both'  => optional($first)->mnemonic_both,
+                'mnemonic_fleet' => optional($first)->mnemonic_fleet,
+                'mnemonic_ship'  => optional($first)->mnemonic_ship,
+                'departments'    => $departments,
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'count'   => $ships->flatten()->count(),
             'data'    => $result,
         ]);
     }
