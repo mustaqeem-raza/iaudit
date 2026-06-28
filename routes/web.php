@@ -14,7 +14,6 @@ Route::get('/audits', [AuditReportController::class, 'index'])->name('audit.inde
 // Route::get('/audit-report', [AuditReportController::class, 'showReport'])->name('audit.report');
 // Route::get('/audit-pdf-report', [AuditReportController::class, 'showPDFReport'])->name('audit.pdf.report');
 
-
 Route::get('/', function () {
     return view('welcome');
 });
