@@ -8,6 +8,7 @@ use App\Models\CrtTrapLocationIaudit;
 use App\Models\DepartmentIaudit;
 use App\Models\EfkIAudit;
 use App\Models\IpmEfkIAudit;
+use App\Models\IpmTrapIAudit;
 use App\Models\OtherCrtIAudit;
 use App\Models\OtherEfkIAudit;
 use Illuminate\Http\Request;
@@ -435,48 +436,138 @@ class ApiController extends Controller
         )->get()
             ->groupBy('ship_name');
 
+        // Hierarchy: Ship -> EFK_Type -> Deck_No -> Department -> Area -> Location (Type_UVT)
         $result = $ships->map(function ($shipRows, $shipName) {
             $first = $shipRows->first();
 
-            // Group by department
-            $departments = $shipRows->groupBy('department')->map(function ($deptRows, $deptName) {
+            $efkTypes = $shipRows->groupBy('efk_type')->map(function ($typeRows, $efkType) {
 
-                // Group by deck
-                $decks = $deptRows->groupBy('deck_no')->map(function ($deckRows, $deckName) {
+                $decks = $typeRows->groupBy('deck_no')->map(function ($deckRows, $deckName) {
 
-                    // Group by area
-                    $areas = $deckRows->groupBy('area')->map(function ($areaRows, $areaName) {
-                        $locations = $areaRows->map(function ($row) {
+                    $departments = $deckRows->groupBy('department')->map(function ($deptRows, $deptName) {
+
+                        $areas = $deptRows->groupBy('area')->map(function ($areaRows, $areaName) {
+
+                            $locations = $areaRows->map(function ($row) {
+                                return [
+                                    'location'     => $row->location,
+                                    'type_uvt'     => $row->type_uvt,
+                                    'count_type'   => $row->count_type,
+                                    'install_date' => $row->install_date,
+                                ];
+                            })->values();
+
                             return [
-                                'location'     => $row->location,
-                                'efk_type'     => $row->efk_type,
-                                'type_uvt'     => $row->type_uvt,
-                                'count_type'   => $row->count_type,
-                                'install_date' => $row->install_date,
+                                'area'      => $areaName,
+                                'locations' => $locations,
                             ];
                         })->values();
 
                         return [
-                            'area'      => $areaName,
-                            'locations' => $locations,
+                            'department' => $deptName,
+                            'areas'      => $areas,
                         ];
                     })->values();
 
                     return [
-                        'deck'  => $deckName,
-                        'areas' => $areas,
+                        'deck'        => $deckName,
+                        'departments' => $departments,
                     ];
                 })->values();
 
                 return [
-                    'department' => $deptName,
-                    'decks'      => $decks,
+                    'efk_type' => $efkType,
+                    'decks'    => $decks,
                 ];
             })->values();
 
             return [
                 'ship_name'      => $shipName,
                 'mnemonic_both'  => optional($first)->mnemonic_both,
+                'mnemonic_fleet' => optional($first)->mnemonic_fleet,
+                'mnemonic_ship'  => optional($first)->mnemonic_ship,
+                'efk_types'      => $efkTypes,
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'count'   => $ships->flatten()->count(),
+            'data'    => $result,
+        ]);
+    }
+
+    public function ipmTrapLocations()
+    {
+        $ships = IpmTrapIAudit::select(
+            'ship_name',
+            'mnemonic_all',
+            'mnemonic_fleet',
+            'mnemonic_ship',
+            'dept_name',
+            'trap_type',
+            'deck_no',
+            'area',
+            'location',
+            'location_trap',
+            'count_type'
+        )->get()
+            ->groupBy('ship_name');
+
+        // Hierarchy: Ship -> Dept_Name -> Trap_Type -> Deck_No -> Area -> Location -> Location_Trap
+        $result = $ships->map(function ($shipRows, $shipName) {
+            $first = $shipRows->first();
+
+            $departments = $shipRows->groupBy('dept_name')->map(function ($deptRows, $deptName) {
+
+                $trapTypes = $deptRows->groupBy('trap_type')->map(function ($typeRows, $trapType) {
+
+                    $decks = $typeRows->groupBy('deck_no')->map(function ($deckRows, $deckName) {
+
+                        $areas = $deckRows->groupBy('area')->map(function ($areaRows, $areaName) {
+
+                            $locations = $areaRows->groupBy('location')->map(function ($locRows, $locName) {
+
+                                $traps = $locRows->map(function ($row) {
+                                    return [
+                                        'location_trap' => $row->location_trap,
+                                        'count_type'    => $row->count_type,
+                                    ];
+                                })->values();
+
+                                return [
+                                    'location'       => $locName,
+                                    'location_traps' => $traps,
+                                ];
+                            })->values();
+
+                            return [
+                                'area'      => $areaName,
+                                'locations' => $locations,
+                            ];
+                        })->values();
+
+                        return [
+                            'deck'  => $deckName,
+                            'areas' => $areas,
+                        ];
+                    })->values();
+
+                    return [
+                        'trap_type' => $trapType,
+                        'decks'     => $decks,
+                    ];
+                })->values();
+
+                return [
+                    'department' => $deptName,
+                    'trap_types' => $trapTypes,
+                ];
+            })->values();
+
+            return [
+                'ship_name'      => $shipName,
+                'mnemonic_all'   => optional($first)->mnemonic_all,
                 'mnemonic_fleet' => optional($first)->mnemonic_fleet,
                 'mnemonic_ship'  => optional($first)->mnemonic_ship,
                 'departments'    => $departments,

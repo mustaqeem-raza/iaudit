@@ -14,7 +14,7 @@ class IpmEfkIAuditSeeder extends Seeder
      */
     public function run(): void
     {
-        $path = database_path('seeders/data/IPM_EFK.csv');
+        $path = database_path('seeders/data/_IPM CSV EFKS (2025-07-16).csv');
 
         if (!file_exists($path)) {
             $this->command->warn("Missing data file: {$path}");
@@ -24,6 +24,6 @@ class IpmEfkIAuditSeeder extends Seeder
         IpmEfkIAudit::truncate();
 
         Excel::import(new IpmEfkIAuditImport, $path);
-        $this->command->info("IPM_EFK.csv import completed.");
+        $this->command->info("IPM EFKS CSV import completed.");
     }
 }

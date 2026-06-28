@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             OtherCrtIAuditSeeder::class,
             OtherEfkIAuditSeeder::class,
             IpmEfkIAuditSeeder::class,
+            IpmTrapIAuditSeeder::class,
         ]);
     }
 }
