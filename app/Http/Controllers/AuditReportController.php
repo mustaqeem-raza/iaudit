@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Spatie\Browsershot\Browsershot;
+use Symfony\Component\Process\ExecutableFinder;
 
 class AuditReportController extends Controller
 {
@@ -127,17 +128,97 @@ class AuditReportController extends Controller
             return $response->body();
         }
 
-        return Browsershot::html($html)
-            ->setNodeBinary('/usr/bin/node')
-            ->setNpmBinary('/usr/bin/npm')
-            ->setChromePath('/usr/bin/google-chrome')
+        $browsershot = Browsershot::html($html)
             ->noSandbox()
             ->disableJavascript()
             ->setOption('waitUntil', 'load')
             ->windowSize(1241, 1755)
             ->timeout(120)
-            ->format('A4')
-            ->pdf();
+            ->format('A4');
+
+        if ($nodeBinary = $this->findNodeBinary()) {
+            $browsershot->setNodeBinary($nodeBinary);
+        }
+
+        if ($npmBinary = $this->findNpmBinary()) {
+            $browsershot->setNpmBinary($npmBinary);
+        }
+
+        if ($chromePath = $this->findChromePath()) {
+            $browsershot->setChromePath($chromePath);
+        }
+
+        return $browsershot->pdf();
+    }
+
+    /**
+     * Resolve the Node.js binary for the current OS.
+     *
+     * Honours BROWSERSHOT_NODE_BINARY when set (useful on servers where
+     * node isn't on the web server's PATH), otherwise searches PATH —
+     * which works on Windows, Linux and macOS alike.
+     */
+    private function findNodeBinary(): ?string
+    {
+        return config('services.browsershot.node_binary')
+            ?: (new ExecutableFinder())->find('node');
+    }
+
+    /**
+     * Resolve the npm binary for the current OS. See findNodeBinary().
+     */
+    private function findNpmBinary(): ?string
+    {
+        return config('services.browsershot.npm_binary')
+            ?: (new ExecutableFinder())->find('npm');
+    }
+
+    /**
+     * Resolve a Chrome/Chromium/Edge executable for the current OS.
+     *
+     * Honours BROWSERSHOT_CHROME_PATH when set, otherwise searches PATH
+     * plus the well-known install locations for Windows, Linux and macOS
+     * so Browsershot never has to fall back to a hardcoded Unix path.
+     */
+    private function findChromePath(): ?string
+    {
+        if ($configured = config('services.browsershot.chrome_path')) {
+            return $configured;
+        }
+
+        $finder = new ExecutableFinder();
+
+        [$names, $extraDirs] = match (PHP_OS_FAMILY) {
+            'Windows' => [
+                ['chrome.exe', 'msedge.exe'],
+                array_filter([
+                    getenv('ProgramFiles') . '\\Google\\Chrome\\Application',
+                    getenv('ProgramFiles(x86)') . '\\Google\\Chrome\\Application',
+                    getenv('LOCALAPPDATA') . '\\Google\\Chrome\\Application',
+                    getenv('ProgramFiles') . '\\Microsoft\\Edge\\Application',
+                    getenv('ProgramFiles(x86)') . '\\Microsoft\\Edge\\Application',
+                ]),
+            ],
+            'Darwin' => [
+                ['Google Chrome', 'Chromium'],
+                [
+                    '/Applications/Google Chrome.app/Contents/MacOS',
+                    '/Applications/Chromium.app/Contents/MacOS',
+                ],
+            ],
+            default => [
+                ['google-chrome', 'google-chrome-stable', 'chromium-browser', 'chromium'],
+                ['/usr/bin', '/opt/google/chrome', '/snap/bin'],
+            ],
+        };
+
+        foreach ($names as $name) {
+            if ($path = $finder->find($name, null, $extraDirs)) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 
     /**

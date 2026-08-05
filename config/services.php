@@ -38,4 +38,13 @@ return [
     'pdfshift' => [
         'key' => env('PDFSHIFT_API_KEY'),
     ],
+
+    // Optional overrides for the local Browsershot fallback (used when
+    // PDFSHIFT_API_KEY is not set). Leave unset to let the app
+    // auto-detect node/npm/chrome on Windows, Linux and macOS.
+    'browsershot' => [
+        'node_binary' => env('BROWSERSHOT_NODE_BINARY'),
+        'npm_binary' => env('BROWSERSHOT_NPM_BINARY'),
+        'chrome_path' => env('BROWSERSHOT_CHROME_PATH'),
+    ],
 ];
