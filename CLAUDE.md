@@ -63,3 +63,11 @@ iAudit is a Laravel-based audit management system with a mobile app frontend. Th
 - Need to group answers by audit_id to form a complete audit
 - Initial data (questions, ships, etc.) seeded via Excel imports
 - PDF reports use base64-encoded images from `public/assets/` directory
+
+## Development Rules
+Apply these to all code written or edited in this project, without needing to be asked each time:
+- **DRY**: extract repeated logic into a shared method/helper/service instead of copy-pasting. Before adding new logic, check if something equivalent already exists (a model scope, a trait, an existing importer/service method) and reuse or extend it rather than duplicating it.
+- **Clean**: small, single-purpose methods; clear naming; comments explain *why* (a non-obvious decision, a constraint, a gotcha), not *what* the code already says.
+- **Optimized**: avoid N+1 queries (eager-load relationships), avoid per-row queries inside loops where a batch/bulk query works instead, avoid unnecessary re-computation.
+- **Scalable**: don't hardcode values that are really config/data (table names, template identifiers, thresholds) — pull them from constants, config, or the DB. Design for more data/rows/templates than exist today, not just the current fixture.
+- When a table split or seemingly duplicated write looks odd (e.g. one import row writing to two tables), check for an existing normalized-design rationale (docs, model relationships, migration comments) before assuming it's a bug — this codebase has intentional 1:1/1:many splits by concern (see `questions_iaudit` vs `question_ncs_iaudit`).

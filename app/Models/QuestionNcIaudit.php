@@ -14,6 +14,8 @@ class QuestionNcIaudit extends Model
         'nc_heading', 'nc_text',
         'nc_rem_hd', 'nc_con_hd', 'nc_usph_hd', 'nc_ipm_hd',
         'nc_rem_text', 'nc_con_text', 'nc_usph_text', 'nc_ipm_ref',
+        'responsibility', 'consultant_remark', 'vsp_item_no',
+        'point_loss', 'vsp_reference', 'vsp_description',
     ];
     protected $guarded = [];
 

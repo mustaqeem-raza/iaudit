@@ -8,7 +8,7 @@ class CriteriaIaudit extends Model
 {
     protected $table = 'criteria_iaudit';
     protected $primaryKey = 'criteria_id';
-    protected $fillable = ['reference_id','question','table_heading','main_heading'];
+    protected $fillable = ['criteria_id','reference_id','question','table_heading','main_heading','template','short_code'];
 
     public $timestamps = false;
     public $incrementing = false;

@@ -11,6 +11,8 @@ use App\Models\IpmEfkIAudit;
 use App\Models\IpmTrapIAudit;
 use App\Models\OtherCrtIAudit;
 use App\Models\OtherEfkIAudit;
+use App\Models\QuestionIaudit;
+use App\Services\QuestionHierarchyService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -179,6 +181,67 @@ class ApiController extends Controller
                 'details'         => $details,
             ];
         })->values();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $result,
+        ]);
+    }
+
+    /**
+     * v2 of GET /questions — additive fields from the new per-template Excel
+     * import (see refactor-schema.md), and the only endpoint that can see
+     * questions imported through that pipeline at all (they're invisible to
+     * the v1 department→template→question traversal above, which keys off
+     * reference_id — a column the new importer never populates).
+     *
+     * Deliberately a separate versioned endpoint rather than a change to
+     * questions() above: the currently-deployed mobile app calls that route
+     * today, and every device must keep getting its existing, unchanged
+     * response until the app itself is updated to call v2.
+     */
+    public function questionsV2()
+    {
+        // Whitelisted explicitly (10 legacy NC columns + 6 added for the new
+        // Data-sheet import) rather than serializing "whatever columns the
+        // table happens to have" — see QuestionHierarchyService.
+        $ncFields = [
+            'nc_heading', 'nc_text', 'nc_rem_hd', 'nc_rem_text',
+            'nc_con_hd', 'nc_con_text', 'nc_usph_hd', 'nc_usph_text',
+            'nc_ipm_hd', 'nc_ipm_ref',
+            'responsibility', 'consultant_remark', 'vsp_item_no',
+            'point_loss', 'vsp_reference', 'vsp_description',
+        ];
+
+        $mapper = function (QuestionIaudit $q) use ($ncFields) {
+            return [
+                'question_id'      => $q->question_id,
+                'question_text'    => $q->question_text,
+                'information_text' => $q->information_text,
+                'question_ncs'     => $q->ncs->map(fn ($nc) => $nc->only($ncFields))->values(),
+                'block_ref'        => $q->block_ref,
+                'text_icon'        => $q->text_icon,
+                'row_type'         => $q->row_type,
+                'template'         => $q->template,
+                'short_code'       => $q->short_code,
+            ];
+        };
+
+        $tree = app(QuestionHierarchyService::class)->buildTree($mapper);
+
+        $result = $tree->map(fn ($department) => [
+            'department_id'   => $department['department_id'],
+            'department_name' => $department['department_name'],
+            'details'         => $department['headings']->map(fn ($heading) => [
+                'heading_id'   => $heading['heading_id'],
+                'heading_name' => $heading['heading_name'],
+                'subheadings'  => $heading['subheadings']->map(fn ($sub) => [
+                    'subheading_id'   => $sub['subheading_id'],
+                    'subheading_name' => $sub['subheading_name'],
+                    'categories'      => $sub['categories'],
+                ])->values(),
+            ])->values(),
+        ])->values();
 
         return response()->json([
             'success' => true,

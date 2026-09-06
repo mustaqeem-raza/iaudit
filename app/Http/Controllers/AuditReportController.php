@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Audit;
 use App\Models\CrtTrapLocationIaudit;
-use App\Models\DepartmentIaudit;
 use App\Models\EfkIAudit;
+use App\Models\QuestionIaudit;
 use App\Models\Ship;
 use App\Models\User;
+use App\Services\QuestionHierarchyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Spatie\Browsershot\Browsershot;
@@ -253,96 +254,99 @@ class AuditReportController extends Controller
             ->filter(fn($a) => $a->question?->question_text)
             ->keyBy(fn($a) => $normalize($a->question->question_text));
 
+        // `short_code` is a stable natural key on newly-imported questions
+        // (nothing on legacy rows, so normalize()/$answersByText above stays
+        // the only join for existing content) — exposed additively so Blade
+        // can start joining on it per-row as content for new templates lands.
+        $answersByShortCode = $audit->answers
+            ->filter(fn($a) => $a->question?->short_code)
+            ->keyBy(fn($a) => $a->question->short_code);
+
         // Build the full departments → headings → subheadings → categories → questions tree
-        // (matches the same shape used by the mobile app's GET /api/questions)
-        $departments = DepartmentIaudit::with([
-            'templates.questions' => function ($q) {
-                $q->with(['heading', 'subHeading', 'category', 'ncs']);
-            },
-        ])->get();
+        // (same traversal used by the mobile app's GET /api/questions, shared
+        // via QuestionHierarchyService so both consumers see legacy + newly
+        // imported questions alike — see refactor-schema.md).
+        $mapper = function (QuestionIaudit $q) use ($answersByQuestion) {
+            $a = $answersByQuestion->get($q->question_id);
 
-        $departmentsTree = $departments->map(function ($dept) use ($answersByQuestion) {
-            $allQuestions = $dept->templates
-                ->flatMap(fn($t) => $t->questions)
-                ->filter()
-                ->unique('question_id');
+            return [
+                'question_id'      => $q->question_id,
+                'question_text'    => $q->question_text,
+                'information_text' => $q->information_text,
+                'ncs'              => $q->ncs ?? collect(),
+                'answer'           => $a?->answer,
+                'note'             => $a?->note,
+                'files'            => $a?->files ?? [],
+                'is_answered'      => (bool) $a,
+                // Additive — populated for rows written by the new
+                // per-template importer, null for legacy rows.
+                'block_ref'  => $q->block_ref,
+                'text_icon'  => $q->text_icon,
+                'row_type'   => $q->row_type,
+                'template'   => $q->template,
+                'short_code' => $q->short_code,
+            ];
+        };
 
-            $byHeading = $allQuestions->groupBy(fn($q) => optional($q->heading)->heading_id);
+        $tree = app(QuestionHierarchyService::class)->buildTree($mapper);
 
-            $headings = $byHeading->map(function ($hQuestions, $hId) use ($answersByQuestion) {
-                $headingName = optional($hQuestions->first()->heading)->name ?? 'General';
+        // VSP point-loss aggregation — nothing computes this anywhere today
+        // (audits.score exists but is never written). Exposed as raw data
+        // only, not written to audits.score: Point_Loss's full scoring
+        // meaning is still client-unconfirmed (refactor-schema.md §6).
+        $vspPointLossTotal = 0;
 
-                $bySubheading = $hQuestions->groupBy(fn($q) => optional($q->subHeading)->subheading_id);
+        $departmentsTree = $tree->map(function ($department) use (&$vspPointLossTotal) {
+            $departmentPointLoss = 0;
 
-                $subheadings = $bySubheading->map(function ($subQuestions, $subId) use ($answersByQuestion) {
-                    $subName       = optional($subQuestions->first()->subHeading)->name ?? 'General';
-                    $criteriaText  = $subQuestions->pluck('information_text')->filter()->first();
+            $headings = $department['headings']->map(function ($heading) use (&$departmentPointLoss, &$vspPointLossTotal) {
+                $headingPointLoss = 0;
 
-                    $byCategory = $subQuestions->groupBy(fn($q) => optional($q->category)->category_id);
+                $subheadings = $heading['subheadings']->map(function ($sub) use (&$headingPointLoss) {
+                    $allQuestions = $sub['categories']->flatMap(fn($cat) => $cat['questions']);
+                    $answeredQuestions = $allQuestions->filter(fn($q) => $q['is_answered']);
+                    $noAnswerQuestions = $answeredQuestions->filter(fn($q) => $q['answer'] === 'No');
 
-                    $categories = $byCategory->map(function ($catQuestions, $catId) use ($answersByQuestion) {
-                        $catName = optional($catQuestions->first()->category)->name ?? 'General';
-
-                        $questions = $catQuestions->map(function ($q) use ($answersByQuestion) {
-                            $a = $answersByQuestion->get($q->question_id);
-                            return [
-                                'question_id'      => $q->question_id,
-                                'question_text'    => $q->question_text,
-                                'information_text' => $q->information_text,
-                                'ncs'              => $q->ncs ?? collect(),
-                                'answer'           => $a?->answer,
-                                'note'             => $a?->note,
-                                'files'            => $a?->files ?? [],
-                                'is_answered'      => (bool) $a,
-                            ];
-                        })->values();
-
-                        return [
-                            'category_id'   => $catId,
-                            'category_name' => $catName,
-                            'questions'     => $questions,
-                        ];
-                    })->values();
-
-                    $answeredQuestions = $subQuestions->filter(
-                        fn($q) => $answersByQuestion->has($q->question_id)
+                    $subheadingPointLoss = $noAnswerQuestions->sum(
+                        fn($q) => $q['ncs']->sum(fn($nc) => $nc->point_loss ?? 0)
                     );
-                    $noAnswerQuestions = $answeredQuestions->filter(
-                        fn($q) => optional($answersByQuestion->get($q->question_id))->answer === 'No'
-                    );
+                    $headingPointLoss += $subheadingPointLoss;
 
                     return [
-                        'subheading_id'   => $subId,
-                        'subheading_name' => $subName,
-                        'criteria_text'   => $criteriaText,
-                        'categories'      => $categories,
-                        'has_answers'     => $answeredQuestions->isNotEmpty(),
-                        'non_compliant'   => $noAnswerQuestions->map(function ($q) use ($answersByQuestion) {
-                            $a = $answersByQuestion->get($q->question_id);
-                            return [
-                                'question_id'   => $q->question_id,
-                                'question_text' => $q->question_text,
-                                'note'          => $a?->note,
-                                'files'         => $a?->files ?? [],
-                                'ncs'           => $q->ncs ?? collect(),
-                            ];
-                        })->values(),
+                        'subheading_id'    => $sub['subheading_id'],
+                        'subheading_name'  => $sub['subheading_name'],
+                        'criteria_text'    => $sub['information_text'],
+                        'categories'       => $sub['categories'],
+                        'has_answers'      => $answeredQuestions->isNotEmpty(),
+                        'point_loss_total' => $subheadingPointLoss,
+                        'non_compliant'    => $noAnswerQuestions->map(fn($q) => [
+                            'question_id'   => $q['question_id'],
+                            'question_text' => $q['question_text'],
+                            'note'          => $q['note'],
+                            'files'         => $q['files'],
+                            'ncs'           => $q['ncs'],
+                        ])->values(),
                     ];
                 })->values();
 
+                $departmentPointLoss += $headingPointLoss;
+                $vspPointLossTotal += $headingPointLoss;
+
                 return [
-                    'heading_id'   => $hId,
-                    'heading_name' => $headingName,
-                    'subheadings'  => $subheadings,
-                    'has_answers'  => $subheadings->contains(fn($s) => $s['has_answers']),
+                    'heading_id'       => $heading['heading_id'],
+                    'heading_name'     => $heading['heading_name'],
+                    'subheadings'      => $subheadings,
+                    'has_answers'      => $subheadings->contains(fn($s) => $s['has_answers']),
+                    'point_loss_total' => $headingPointLoss,
                 ];
             })->values();
 
             return [
-                'department_id'   => $dept->department_id,
-                'department_name' => $dept->name,
-                'headings'        => $headings,
-                'has_answers'     => $headings->contains(fn($h) => $h['has_answers']),
+                'department_id'    => $department['department_id'],
+                'department_name'  => $department['department_name'],
+                'headings'         => $headings,
+                'has_answers'      => $headings->contains(fn($h) => $h['has_answers']),
+                'point_loss_total' => $departmentPointLoss,
             ];
         })->values();
 
@@ -406,6 +410,8 @@ class AuditReportController extends Controller
             'trap_locations'          => $trapLocations,
             'efk_locations'           => $efkLocations,
             'answers_by_question_text'=> $answersByText,
+            'answers_by_short_code'   => $answersByShortCode,
+            'vsp_point_loss_total'    => $vspPointLossTotal,
         ];
     }
 
@@ -446,6 +452,8 @@ class AuditReportController extends Controller
             'trap_locations'     => collect(),
             'efk_locations'      => collect(),
             'answers_by_question_text' => collect(),
+            'answers_by_short_code'    => collect(),
+            'vsp_point_loss_total'     => 0,
         ];
     }
 

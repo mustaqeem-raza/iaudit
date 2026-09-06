@@ -4,20 +4,30 @@
 
     $auditData = $auditData ?? [];
     $answersByText = $auditData['answers_by_question_text'] ?? collect();
+    $answersByShortCode = $auditData['answers_by_short_code'] ?? collect();
 
     // Resolves a hardcoded report question to its submitted answer cell.
-    // Matches by normalized text against $answersByText (built in the controller).
+    // Optional $shortCode is checked first — it's a stable natural key on
+    // newly-imported questions (see refactor-schema.md) — falling back to
+    // the original normalized-text match against $answersByText for
+    // existing call sites, which pass one argument and are unaffected.
     // Falls back to a dash cell when there is no matching answer yet.
-    $answerCell = function ($qText) use ($answersByText) {
-        $s = html_entity_decode((string) $qText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $s = strtr($s, [
-            "\u{2018}" => "'", "\u{2019}" => "'",
-            "\u{201C}" => '"', "\u{201D}" => '"',
-            "\u{2013}" => '-', "\u{2014}" => '-',
-        ]);
-        $key = mb_strtolower(trim(preg_replace('/\s+/u', ' ', $s)));
+    $answerCell = function ($qText, $shortCode = null) use ($answersByText, $answersByShortCode) {
+        $answer = $shortCode && $answersByShortCode->has($shortCode)
+            ? optional($answersByShortCode->get($shortCode))->answer
+            : null;
 
-        $answer = optional($answersByText->get($key))->answer;
+        if (!$answer) {
+            $s = html_entity_decode((string) $qText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $s = strtr($s, [
+                "\u{2018}" => "'", "\u{2019}" => "'",
+                "\u{201C}" => '"', "\u{201D}" => '"',
+                "\u{2013}" => '-', "\u{2014}" => '-',
+            ]);
+            $key = mb_strtolower(trim(preg_replace('/\s+/u', ' ', $s)));
+            $answer = optional($answersByText->get($key))->answer;
+        }
+
         if (!$answer) {
             return '<td class="doc-na">&mdash;</td>';
         }

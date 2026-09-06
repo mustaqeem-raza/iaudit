@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuditReportController;
+use App\Http\Controllers\ExcelImportController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/audit/{id}/download', [AuditReportController::class, 'downloadPdf'])->name('audit.download');
 
     Route::get('/dashboard', [AuditReportController::class, 'index'])->name('dashboard');
+
+    // Admin: import the question bank workbook (Week 1 of the IPM schema update)
+    Route::get('/questions/import', [ExcelImportController::class, 'showImportForm'])->name('questions.import.show');
+    Route::post('/questions/import', [ExcelImportController::class, 'import'])->name('questions.import.store');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
