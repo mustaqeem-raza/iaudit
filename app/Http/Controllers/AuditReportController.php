@@ -135,6 +135,9 @@ class AuditReportController extends Controller
             ->setOption('waitUntil', 'load')
             ->windowSize(1241, 1755)
             ->timeout(120)
+            // Chrome strips background colours when printing unless told
+            // otherwise; PDFShift keeps them, so this makes the outputs match.
+            ->showBackground()
             ->format('A4');
 
         if ($nodeBinary = $this->findNodeBinary()) {
