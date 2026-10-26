@@ -28,15 +28,16 @@
                         <code>Data</code> sheet.
                     </p>
 
-                    <div class="rounded-md bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800 flex gap-2">
-                        <span aria-hidden="true">⚠️</span>
-                        <p>
-                            <strong>Re-importing updates this template in place.</strong>
-                            Submitted audit answers stay attached to their questions.
-                            Questions removed from the sheet are deleted only when they have no answers;
-                            otherwise they are retired so existing audits still render.
-                        </p>
-                    </div>
+                    @if (! session('success') && ! session('error') && ! session('importSummary') && ! $errors->any())
+                        <div class="rounded-md bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+                            <p class="font-medium">Re-importing updates this template in place.</p>
+                            <ul class="mt-2 list-disc list-inside space-y-1 text-amber-700">
+                                <li>Submitted audit answers stay attached to their questions.</li>
+                                <li>Questions removed from the sheet are deleted only if they have no answers.</li>
+                                <li>Otherwise they are retired so existing audits still render.</li>
+                            </ul>
+                        </div>
+                    @endif
 
                     <form method="POST" action="{{ route('questions.import.store') }}" enctype="multipart/form-data" class="space-y-4">
                         @csrf
