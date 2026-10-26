@@ -31,7 +31,10 @@
                     <div class="rounded-md bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800 flex gap-2">
                         <span aria-hidden="true">⚠️</span>
                         <p>
-                            <strong>Every import replaces existing data for that template.</strong>
+                            <strong>Re-importing updates this template in place.</strong>
+                            Submitted audit answers stay attached to their questions.
+                            Questions removed from the sheet are deleted only when they have no answers;
+                            otherwise they are retired so existing audits still render.
                         </p>
                     </div>
 
@@ -76,7 +79,8 @@
                             <thead>
                                 <tr class="text-xs text-gray-500 uppercase tracking-wide">
                                     <th class="py-1 pr-4">Row type</th>
-                                    <th class="py-1 pr-4">Replaced (old)</th>
+                                    <th class="py-1 pr-4">Removed</th>
+                                    <th class="py-1 pr-4">Updated</th>
                                     <th class="py-1 pr-4">Imported (new)</th>
                                     <th class="py-1 pr-4">Now in database</th>
                                 </tr>
@@ -86,6 +90,7 @@
                                     <tr class="border-t border-gray-100">
                                         <td class="py-1 pr-4">{{ $label }}</td>
                                         <td class="py-1 pr-4 text-gray-500">{{ $summary['replaced'][$key] ?? 0 }}</td>
+                                        <td class="py-1 pr-4 text-gray-700">{{ $summary['updated'][$key] ?? 0 }}</td>
                                         <td class="py-1 pr-4 font-medium text-green-700">{{ $summary['created'][$key] ?? 0 }}</td>
                                         <td class="py-1 pr-4 font-semibold">{{ $summary['liveTotals'][$key] ?? 0 }}</td>
                                     </tr>

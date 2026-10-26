@@ -86,6 +86,7 @@ class ExcelImportController extends Controller
             'replaced'           => $importer->replaced,
             'created'            => $importer->created,
             'updated'            => $importer->updated,
+            'retired'            => $importer->retired,
             'skipped'            => count($importer->skipped),
             'blank_rows_ignored' => $importer->blankRowsIgnored,
         ]);
@@ -96,7 +97,9 @@ class ExcelImportController extends Controller
         // what this one run touched".
         $liveTotals = [
             'question' => QuestionIaudit::where('template', $importer->templateName)
-                ->where('row_type', 'question')->count(),
+                ->where('row_type', 'question')
+                ->where('is_active', true)
+                ->count(),
             'text'     => TextBoxIaudit::where('template', $importer->templateName)->count(),
             'criteria' => CriteriaIaudit::where('template', $importer->templateName)->count(),
         ];
@@ -108,6 +111,7 @@ class ExcelImportController extends Controller
                 'replaced'         => $importer->replaced,
                 'created'          => $importer->created,
                 'updated'          => $importer->updated,
+                'retired'          => $importer->retired,
                 'liveTotals'       => $liveTotals,
                 'skipped'          => $importer->skipped,
                 'warnings'         => $importer->warnings,

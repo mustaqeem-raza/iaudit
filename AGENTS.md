@@ -55,6 +55,8 @@ Reference/lookup data (questions, departments, headings, trap/EFK locations, etc
 | GET | `/audit/{id}/download` | `AuditReportController@downloadPdf` | `auth`,`verified` | `audit.download` |
 | GET | `/dashboard` | `AuditReportController@index` | `auth`,`verified` | `dashboard` |
 | GET/PATCH/DELETE | `/profile` | `ProfileController@edit/update/destroy` | `auth`,`verified` | `profile.*` |
+| GET | `/questions/import` | `ExcelImportController@showImportForm` | `auth`,`verified` | `questions.import.show` |
+| POST | `/questions/import` | `ExcelImportController@import` | `auth`,`verified` | `questions.import.store` |
 
 `routes/auth.php` pulls in standard Breeze auth routes (register, login, password reset/confirm, email verification, logout).
 
@@ -98,7 +100,7 @@ Reference/lookup data (questions, departments, headings, trap/EFK locations, etc
 
 **`ProfileController`** — standard Breeze profile edit/update/delete.
 
-**`ExcelImportController`** (`app/Http/Controllers/ExcelImportController.php`) — empty stub, no methods, not wired to any route. The real Excel import logic lives in `app/Imports/*`, driven by seeders (see below).
+**`ExcelImportController`** (`app/Http/Controllers/ExcelImportController.php`) — admin question-bank import (`GET/POST /questions/import`). Detects the Data sheet by a `Criteria=Template` + `Title=Audit Report` marker row, then runs `QuestionDataSheetImport` (via `QuestionWorkbookImport`). Re-import upserts by `[template, short_code]` so existing `question_id`s (and any `answers_iaudit` rows pointing at them) stay intact; questions dropped from the sheet are deleted only when they have no answers, otherwise `is_active` is set false. Seeded lookup imports still live in `app/Imports/*` driven by seeders.
 
 **`Auth/*`** — stock Breeze auth controllers (registration, login, password reset/confirm, email verification).
 

@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\AnswerIaudit;
 use App\Models\CategoryIaudit;
 use App\Models\CriteriaIaudit;
 use App\Models\DepartmentIaudit;
@@ -10,11 +11,10 @@ use App\Models\QuestionIaudit;
 use App\Models\QuestionNcIaudit;
 use App\Models\SubHeadingIaudit;
 use App\Models\TextBoxIaudit;
-use Illuminate\Database\QueryException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use RuntimeException;
 
 /**
  * Imports the single flat `Data` sheet of IPM_Schema_Update.xlsx.
@@ -23,18 +23,16 @@ use RuntimeException;
  * row-type (column C, `Criteria`), which is why this is ToCollection
  * rather than ToModel — ToModel's "return one model" contract doesn't fit.
  *
- * Delete-and-replace, scoped strictly to the sheet's own template: every
- * existing questions_iaudit/criteria_iaudit/text_boxes_iaudit row for
- * `$this->templateName` is removed before the sheet's rows are written
- * back fresh, so re-importing the same (or an updated) workbook never
- * leaves stale rows behind. This never touches the 150 legacy rows from
- * the old workbook (template IS NULL, out of scope) or any other
- * template's rows. It also never reaches answers_iaudit directly — but if
- * a question being replaced already has live submitted answers attached,
- * the answers_iaudit.question_id FK (onDelete: restrict, see the Week 1
- * migrations) blocks the delete outright and the whole import rolls back
- * (config/excel.php wraps Excel::import() in one DB transaction), rather
- * than silently losing real audit data. See replaceExistingTemplateData().
+ * Upsert-by-[template, short_code], scoped strictly to the sheet's own
+ * template. Existing questions are updated in place so their question_id
+ * (and any answers_iaudit rows pointing at it) stay intact — a wipe-and
+ * reinsert would hit the answers_iaudit.question_id FK (onDelete: restrict)
+ * on any environment that already has submitted audits. After the sheet
+ * is written, rows that disappeared from the workbook are removed only
+ * when nothing references them; questions that still have answers are
+ * soft-retired (`is_active = false`) instead. This never touches the 150
+ * legacy rows from the old workbook (template IS NULL, out of scope) or
+ * any other template's rows. See retireOrRemoveStaleTemplateData().
  *
  * Skip `Config` and `Report` — this class is only ever pointed at the
  * `Data` sheet by QuestionWorkbookImport.
@@ -69,8 +67,11 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
     /** @var string[] non-fatal data-quality notes (missing optional fields etc.) */
     public array $warnings = [];
 
-    /** @var array<string,int> counts of rows removed before this run's fresh insert, keyed by row_type */
+    /** @var array<string,int> counts of rows removed (or retired) because they were no longer in the sheet */
     public array $replaced = ['question' => 0, 'text' => 0, 'criteria' => 0];
+
+    /** Questions dropped from the sheet but kept because submitted answers still point at them. */
+    public int $retired = 0;
 
     private ?int $nextQuestionId = null;
     private ?int $nextCriteriaId = null;
@@ -86,10 +87,12 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
     private array $categoryIds = [];
     private array $departmentIds = [];
 
+    /** @var array<string,array<string,true>> short_codes written this run, keyed by row_type */
+    private array $seenCodes = ['question' => [], 'text' => [], 'criteria' => []];
+
     public function collection(Collection $rows): void
     {
         $this->templateName = $this->resolveTemplateName($rows);
-        $this->replaceExistingTemplateData();
 
         foreach ($rows as $i => $row) {
             // +1 for the zero-based index, +1 for the header row itself.
@@ -134,6 +137,8 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
                 'criteria' => $this->importCriteriaRow($row, $excelRow, $shortCode),
             };
         }
+
+        $this->retireOrRemoveStaleTemplateData();
     }
 
     /**
@@ -154,59 +159,66 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
     }
 
     /**
-     * Remove every existing questions_iaudit/criteria_iaudit/text_boxes_iaudit
-     * row belonging to $this->templateName, so this run's inserts start from
-     * a clean slate for that template and a re-import can never leave a
-     * question behind that was deleted from the sheet. Scoped strictly by
-     * `template` — the 150 legacy rows (template IS NULL) and any other
-     * template are never touched.
-     *
-     * If a question being removed already has live submitted answers
-     * attached, answers_iaudit's FK (onDelete: restrict) blocks the delete
-     * and throws a QueryException here. That's deliberately turned into a
-     * clear, specific error rather than left as a raw SQL message — and
-     * because the whole import runs inside one DB transaction, nothing
-     * partial is left behind: either the whole replace+reimport succeeds,
-     * or none of it does.
+     * After the sheet has been upserted, drop this template's rows that are
+     * no longer in the workbook. Questions that still have submitted answers
+     * cannot be deleted (answers_iaudit.question_id is ON DELETE RESTRICT),
+     * so those are soft-retired instead of blocking the whole import.
+     * Scoped strictly by `template` — legacy rows (template IS NULL) and
+     * any other template are never touched.
      */
-    private function replaceExistingTemplateData(): void
+    private function retireOrRemoveStaleTemplateData(): void
     {
-        $questionIds = QuestionIaudit::where('template', $this->templateName)
+        $staleQuestionIds = $this->staleTemplateQuery(QuestionIaudit::query(), 'short_code', 'question')
             ->where('row_type', 'question')
-            ->pluck('question_id');
+            ->pluck('question_id')
+            ->map(fn ($id) => (int) $id);
+
+        $idsWithAnswers = $staleQuestionIds->isEmpty()
+            ? collect()
+            : AnswerIaudit::whereIn('question_id', $staleQuestionIds)
+                ->pluck('question_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
+
+        $idsToDelete = $staleQuestionIds->diff($idsWithAnswers);
+
+        if ($idsWithAnswers->isNotEmpty()) {
+            QuestionIaudit::whereIn('question_id', $idsWithAnswers)->update(['is_active' => false]);
+            $this->retired = $idsWithAnswers->count();
+            $this->warnings[] = $this->retired === 1
+                ? '1 question was retired (kept for existing audit answers) because it was removed from the workbook.'
+                : "{$this->retired} questions were retired (kept for existing audit answers) because they were removed from the workbook.";
+        }
+
+        if ($idsToDelete->isNotEmpty()) {
+            QuestionNcIaudit::whereIn('question_id', $idsToDelete)->delete();
+            QuestionIaudit::whereIn('question_id', $idsToDelete)->delete();
+        }
 
         $this->replaced = [
-            'question' => $questionIds->count(),
-            'text'     => TextBoxIaudit::where('template', $this->templateName)->count(),
-            'criteria' => CriteriaIaudit::where('template', $this->templateName)->count(),
+            'question' => $idsToDelete->count() + $idsWithAnswers->count(),
+            'text'     => $this->staleTemplateQuery(TextBoxIaudit::query(), 'reference_code', 'text')->delete(),
+            'criteria' => $this->staleTemplateQuery(CriteriaIaudit::query(), 'short_code', 'criteria')->delete(),
         ];
-
-        try {
-            if ($questionIds->isNotEmpty()) {
-                QuestionNcIaudit::whereIn('question_id', $questionIds)->delete();
-                QuestionIaudit::whereIn('question_id', $questionIds)->delete();
-            }
-
-            TextBoxIaudit::where('template', $this->templateName)->delete();
-            CriteriaIaudit::where('template', $this->templateName)->delete();
-        } catch (QueryException $e) {
-            if ($this->isForeignKeyViolation($e)) {
-                throw new RuntimeException(
-                    "Cannot replace template \"{$this->templateName}\" — some of its questions already have "
-                        . 'submitted audit answers attached, which must be preserved. Nothing was changed. '
-                        . 'This template can\'t be safely re-imported until that\'s resolved.',
-                    previous: $e
-                );
-            }
-
-            throw $e;
-        }
     }
 
-    private function isForeignKeyViolation(QueryException $e): bool
+    /**
+     * Rows of this template whose code was not written in this run.
+     * An empty seen-list means the sheet had no rows of that type, so
+     * every existing row is stale — we must not pass `whereNotIn([], …)`
+     * because Laravel compiles that to `0 = 1` and would keep them all.
+     */
+    private function staleTemplateQuery(Builder $query, string $codeColumn, string $rowType): Builder
     {
-        // MySQL 1451: "Cannot delete or update a parent row: a foreign key constraint fails"
-        return ($e->errorInfo[1] ?? null) == 1451;
+        $query->where('template', $this->templateName);
+
+        $codes = array_keys($this->seenCodes[$rowType]);
+        if ($codes !== []) {
+            $query->whereNotIn($codeColumn, $codes);
+        }
+
+        return $query;
     }
 
     /** True when every cell in the row is null or blank after trimming. */
@@ -271,6 +283,8 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
             $this->created['question']++;
         }
 
+        $this->seenCodes['question'][$shortCode] = true;
+
         QuestionNcIaudit::updateOrCreate(
             ['question_id' => $question->question_id],
             [
@@ -326,6 +340,8 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
             ]));
             $this->created['text']++;
         }
+
+        $this->seenCodes['text'][$shortCode] = true;
     }
 
     private function importCriteriaRow(Collection $row, int $excelRow, string $shortCode): void
@@ -355,6 +371,8 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
             ]));
             $this->created['criteria']++;
         }
+
+        $this->seenCodes['criteria'][$shortCode] = true;
     }
 
     private function getOrCreateHeadingId(string $name): int

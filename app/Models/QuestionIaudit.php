@@ -70,10 +70,9 @@ class QuestionIaudit extends Model
     }
 
     /**
-     * Excludes soft-retired questions. A no-op today (every row is written
-     * with is_active=true and nothing yet sets it false — see
-     * refactor-schema.md §3.2) but kept so the query is correct the moment
-     * that changes, without having to remember to add it later.
+     * Excludes questions soft-retired by a later import — a question
+     * dropped from the workbook is set is_active=false when submitted
+     * answers still point at it (see QuestionDataSheetImport).
      */
     public function scopeActive($query)
     {
