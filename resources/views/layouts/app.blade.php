@@ -5,49 +5,36 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'iAudit') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts & Styles (CDN — no Node/Vite build step required) -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-                        },
-                    },
-                },
-            };
-        </script>
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <script>
-            window.axios = axios;
-            window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-        </script>
+        <!-- Fonts and styles: one plain CSS file, no build step -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+        <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ filemtime(public_path('css/admin.css')) }}">
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+    <body>
+        <div class="shell">
             @include('layouts.navigation')
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="content">
+                @isset($header)
+                    <header class="top">
                         {{ $header }}
-                    </div>
-                </header>
-            @endisset
+                    </header>
+                @endisset
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+                @if (session('success'))
+                    <div class="flash good" role="status">{{ session('success') }}</div>
+                @endif
+                @if (session('error'))
+                    <div class="flash bad" role="alert">{{ session('error') }}</div>
+                @endif
+
+                <main id="main" class="stack">
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
     </body>
 </html>

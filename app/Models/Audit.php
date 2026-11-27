@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Audit extends Model
 {
+    // Status values and their labels, used by the admin audit list filter.
+    // submitAudit writes 'completed'; 'pending' is the other state the list shows.
+    public const STATUSES = [
+        'completed' => 'Completed',
+        'pending'   => 'Pending',
+    ];
+
     protected $fillable = [
         'user_id',
         'ship_id',

@@ -19,7 +19,7 @@ Reference/lookup data (questions, departments, headings, trap/EFK locations, etc
 - **DB**: MySQL (database name `iaudit`)
 - **Excel/CSV import**: `maatwebsite/excel` (`app/Imports/*`, driven by seeders)
 - **PDF generation**: PDFShift HTTP API (production) or Spatie Browsershot (local fallback) — see Part 2. `barryvdh/laravel-dompdf` is installed but **not actually used** (only referenced in dead/commented-out code).
-- **Frontend**: **No Node/Vite/Mix build step.** Tailwind, Alpine.js, Axios, and DataTables are all loaded via CDN `<script>`/`<link>` tags directly in Blade layouts. The only local, hand-maintained asset is `public/css/pdf-style.css`.
+- **Frontend**: **No Node/Vite/Mix build step.** Plain Blade HTML styled by one hand-written stylesheet, `public/css/admin.css` (the admin mockup's CSS); no Tailwind, Alpine, axios, jQuery or DataTables (removed 2026-11-28). `public/css/pdf-style.css` styles the PDF report.
 
 ### Running locally
 1. `composer install`
@@ -172,10 +172,10 @@ Three report views, three different levels of "dynamic":
 
 ### Frontend / Admin Panel
 
-- No Node/Vite build — Tailwind, Alpine.js, Axios, jQuery + DataTables (only on the listing page) all loaded via CDN.
-- Auth views under `resources/views/auth/` — unmodified Breeze markup.
-- Layouts: `layouts/app.blade.php` (authenticated shell), `layouts/guest.blade.php` (auth pages), `layouts/navigation.blade.php` (nav bar — currently just a single "Dashboard" link, which routes to the audit listing).
-- `audit-listing.blade.php` — the actual admin home screen: server-paginated + DataTables client-side search/sort table of audits, with a per-row Actions dropdown linking to Plain Report / PDF Report / Download.
+- No Node/Vite build and no JS libraries — plain Blade + `public/css/admin.css` (see `.claude/rules/frontend.md`).
+- Auth views under `resources/views/auth/` — Breeze forms rewritten in plain markup on `admin.css`.
+- Layouts: `layouts/app.blade.php` (authenticated shell: sidebar + teal header), `layouts/guest.blade.php` (auth pages), `layouts/navigation.blade.php` (left sidebar: Audits, Questions, Import & export, Versions, Audit trail, Access; unbuilt sections render `coming-soon.blade.php`).
+- `audit-listing.blade.php` — the actual admin home screen: server-side search, status filter and pagination over all audits, with per-row View / PDF / Download buttons.
 - No admin panel package (Nova/Filament/etc.) — hand-rolled Breeze + Blade.
 
 ### Known Issues / Tech Debt

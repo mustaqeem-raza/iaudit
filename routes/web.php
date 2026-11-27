@@ -32,6 +32,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/questions/import', [ExcelImportController::class, 'showImportForm'])->name('questions.import.show');
     Route::post('/questions/import', [ExcelImportController::class, 'import'])->name('questions.import.store');
 
+    // Database management sections not built yet: each shows a "Coming soon"
+    // page (text in config/coming-soon.php) until its week of the delivery plan.
+    Route::view('/questions', 'coming-soon', config('coming-soon.questions'))->name('questions.index');
+    Route::view('/versions', 'coming-soon', config('coming-soon.versions'))->name('versions.index');
+    Route::view('/audit-trail', 'coming-soon', config('coming-soon.audit-trail'))->name('audit-trail.index');
+    Route::view('/access', 'coming-soon', config('coming-soon.access'))->name('access.index');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
