@@ -8,13 +8,9 @@
     <form method="POST" action="{{ route('password.confirm') }}" class="stack">
         @csrf
 
-        <div class="field">
-            <label for="password">{{ __('Password') }}</label>
-            <input id="password" type="password" name="password" required autocomplete="current-password">
-            @error('password')
-                <p class="err">{{ $message }}</p>
-            @enderror
-        </div>
+        <label class="field">{{ __('Password') }}
+            <input name="password" type="password" required autocomplete="current-password">
+        </label>
 
         <div class="actions">
             <button class="btn primary" type="submit">{{ __('Confirm') }}</button>

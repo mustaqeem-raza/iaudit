@@ -1,11 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div>
-            <h1>{{ __('Audits') }}</h1>
-            <small>Submitted ship inspections, newest first</small>
-        </div>
-    </x-slot>
-
+<x-app-layout :title="__('Audits')" subtitle="Submitted ship inspections, newest first">
     <section class="card">
         <div class="spread">
             <div>
@@ -32,12 +25,6 @@
                 <a class="btn link" href="{{ url()->current() }}">Clear</a>
             @endif
         </form>
-
-        <p class="sub count">
-            @if ($audits->total())
-                Showing {{ $audits->firstItem() }} to {{ $audits->lastItem() }} of {{ $audits->total() }}
-            @endif
-        </p>
 
         <div class="tablewrap">
             <table class="data">

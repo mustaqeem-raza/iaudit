@@ -1,11 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div>
-            <h1>{{ __('Profile') }}</h1>
-            <small>Your account details and password</small>
-        </div>
-    </x-slot>
-
+<x-app-layout :title="__('Profile')" subtitle="Your account details and password">
     <section class="card">
         <div class="measure">
             @include('profile.partials.update-profile-information-form')

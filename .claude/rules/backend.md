@@ -29,12 +29,14 @@ These add backend specifics to the principles in `CLAUDE.md`. They describe what
 - New models declare `$fillable` only. Several existing models also carry `$guarded = []`; don't copy that.
 - Name a new model after its neighbours (`…Iaudit`). Both `Iaudit` and `IAudit` suffixes exist; don't rename them.
 - `User`, `Company`, `Fleet` and `Ship` map legacy tables. Those tables have `deleted_at`, but the models don't use `SoftDeletes`, so queries return soft-deleted rows.
+- `QuestionIaudit` does use `SoftDeletes`: deleting a question hides it (`deleted_at`) so its id stays valid for cached mobile apps and is never reused. Queries skip hidden rows; use `withTrashed()` where ids or codes must stay unique (id and code assignment, the importer's lookup). `AnswerIaudit::question()` includes hidden questions so past audits keep them.
+- `QuestionIaudit::ANSWER_OPTIONS` and `::PRIORITIES` hold the allowed values of `answer_options` and `priority`; validate with `Rule::in(array_keys(...))`.
 - Type relationship return values in new code, as `Audit` does.
 
 ## Validation
 
 - Validate inline with `$request->validate([...])`, rules as arrays, and `Rule::in([...])` for fixed sets. Every project endpoint does this.
-- The only Form Requests are Breeze's. A Form Request is fine for a new admin form with many rules. Don't convert existing endpoints.
+- Form Requests: Breeze's, plus `QuestionRequest` (the admin question form, shared by add and edit). A Form Request is fine for a new admin form with many rules. Don't convert existing endpoints.
 - An `exists:` rule on an array item (`answers.*.question_id`) runs one query per item. For a large array, check the ids with one `whereIn` query.
 
 ## Mobile API contract
@@ -55,7 +57,7 @@ These add backend specifics to the principles in `CLAUDE.md`. They describe what
 - Eager-load with `with([...])`, nested where needed (`ship.fleet.company`, `answers.question`).
 - Read questions through `QuestionHierarchyService::buildTree()` and the `questionRows()` and `active()` scopes on `QuestionIaudit`. A direct query usually misses either the legacy rows or the imported ones.
 - Listings use `paginate(15)->withQueryString()`.
-- Don't load a whole shared table. `AuditReportController::index` loads every user and ship; don't copy it.
+- Don't load a whole shared table (`users`, `ships`) for a page that doesn't show it.
 - For many rows, use one `whereIn` update or delete, or `upsert`. The importers write row by row; don't extend that to larger data.
 
 ## Migrations and schema
@@ -63,7 +65,7 @@ These add backend specifics to the principles in `CLAUDE.md`. They describe what
 - Change the schema only when the task requires it.
 - Follow the `2026_08_29_*` migrations: an anonymous class, additive columns that are nullable or safely defaulted, a comment saying why, a working `down()`, and a file named `add_<x>_to_<table>_table`.
 - A foreign key declared in a migration is not necessarily enforced. Legacy ids are `int unsigned`, reference keys are signed `bigint`, and some production tables were MyISAM. Check `SHOW CREATE TABLE` before relying on a constraint.
-- Reference primary keys are hand-assigned (`max() + 1` in the importer). That is not safe for two imports at once.
+- Reference primary keys are hand-assigned (`max() + 1`). Question, department, heading, subheading and category ids and name lookups go through `App\Services\QuestionReferenceData`, shared by the importer and the admin question form; use one instance per import run or request. That is not safe for two runs at the same moment.
 - Index a new column that is used in `where`, a join or ordering.
 
 ## Transactions and errors
@@ -91,7 +93,7 @@ These add backend specifics to the principles in `CLAUDE.md`. They describe what
   - It finds the sheet by a marker row, not by tab name.
   - It upserts by `[template, short_code]` so each `question_id` stays stable.
   - One row can write several tables. That is by design.
-  - Rows dropped from the sheet are deleted or retired in `retireOrRemoveStaleTemplateData()`.
+  - Rows dropped from the sheet are deleted (hidden) or, when answered, retired in `retireOrRemoveStaleTemplateData()`. A hidden question that is back in the sheet is restored. Until Week 3 the workbook overwrites on-screen question changes.
   - Read the class docblocks before changing it.
 - Seeders: `WorkbookImport` and the per-sheet `ToModel` importers. No controller calls them.
 - Heading keys are slugged (`config/excel.php`), so the `Short_Code` column arrives as `short_code`.

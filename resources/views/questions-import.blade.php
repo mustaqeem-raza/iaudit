@@ -1,11 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div>
-            <h1>Import &amp; export</h1>
-            <small>Upload the question-bank workbook</small>
-        </div>
-    </x-slot>
-
+<x-app-layout title="Import & export" subtitle="Upload the question-bank workbook">
     <section class="card stack">
         <div>
             <h2>{{ __('Import Questions') }}</h2>
@@ -14,16 +7,6 @@
                 <code>Data</code> sheet.
             </p>
         </div>
-
-        @if ($errors->any())
-            <div class="flash bad" role="alert">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         @if (! session('success') && ! session('error') && ! session('importSummary') && ! $errors->any())
             <div class="note">
@@ -39,13 +22,9 @@
         <form method="POST" action="{{ route('questions.import.store') }}" enctype="multipart/form-data" class="stack measure">
             @csrf
 
-            <div class="field">
-                <label for="workbook">Workbook (.xlsx)</label>
-                <input id="workbook" name="workbook" type="file" accept=".xlsx,.xls" required>
-                @error('workbook')
-                    <p class="err">{{ $message }}</p>
-                @enderror
-            </div>
+            <label class="field">Workbook (.xlsx)
+                <input name="workbook" type="file" accept=".xlsx,.xls" required>
+            </label>
 
             <div class="row">
                 <button class="btn primary" type="submit">{{ __('Import') }}</button>

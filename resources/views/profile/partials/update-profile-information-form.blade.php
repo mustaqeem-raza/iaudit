@@ -13,34 +13,26 @@
         @csrf
         @method('patch')
 
-        <div class="field">
-            <label for="name">{{ __('Name') }}</label>
-            <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
-            @error('name')
-                <p class="err">{{ $message }}</p>
-            @enderror
-        </div>
+        <label class="field">{{ __('Name') }}
+            <input name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
+        </label>
 
-        <div class="field">
-            <label for="email">{{ __('Email') }}</label>
-            <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" required autocomplete="username">
-            @error('email')
-                <p class="err">{{ $message }}</p>
-            @enderror
+        <label class="field">{{ __('Email') }}
+            <input name="email" type="email" value="{{ old('email', $user->email) }}" required autocomplete="username">
+        </label>
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <p class="sub">
-                    {{ __('Your email address is unverified.') }}
-                    <button form="send-verification" class="btn link sm" type="submit">
-                        {{ __('Click here to re-send the verification email.') }}
-                    </button>
-                </p>
+        @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+            <p class="sub">
+                {{ __('Your email address is unverified.') }}
+                <button form="send-verification" class="btn link sm" type="submit">
+                    {{ __('Click here to re-send the verification email.') }}
+                </button>
+            </p>
 
-                @if (session('status') === 'verification-link-sent')
-                    <p class="flash good">{{ __('A new verification link has been sent to your email address.') }}</p>
-                @endif
+            @if (session('status') === 'verification-link-sent')
+                <p class="flash good">{{ __('A new verification link has been sent to your email address.') }}</p>
             @endif
-        </div>
+        @endif
 
         <div class="row">
             <button class="btn primary" type="submit">{{ __('Save') }}</button>

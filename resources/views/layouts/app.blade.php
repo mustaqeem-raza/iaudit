@@ -1,40 +1,36 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'iAudit') }}</title>
-
-        <!-- Fonts and styles: one plain CSS file, no build step -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
-        <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ filemtime(public_path('css/admin.css')) }}">
+        @include('layouts.head', ['title' => $title])
     </head>
     <body>
         <div class="shell">
             @include('layouts.navigation')
 
             <div class="content">
-                @isset($header)
-                    <header class="top">
-                        {{ $header }}
-                    </header>
-                @endisset
+                <header class="top">
+                    <div>
+                        <h1>{{ $title }}</h1>
+                        <small>{{ $subtitle }}</small>
+                    </div>
+                </header>
 
-                @if (session('success'))
-                    <div class="flash good" role="status">{{ session('success') }}</div>
-                @endif
-                @if (session('error'))
-                    <div class="flash bad" role="alert">{{ session('error') }}</div>
-                @endif
+                @include('layouts.messages')
 
                 <main id="main" class="stack">
                     {{ $slot }}
                 </main>
             </div>
         </div>
+
+        <script>
+            // A form with data-confirm="…" asks before it is sent (used by every delete button).
+            document.addEventListener('submit', function (event) {
+                var message = event.target.dataset.confirm;
+                if (message && !confirm(message)) {
+                    event.preventDefault();
+                }
+            });
+        </script>
     </body>
 </html>

@@ -19,6 +19,7 @@ Reference docs:
 - [AGENTS.md](AGENTS.md): route, model and migration tables, as of 2026-08-06. Where it disagrees with the code, the code is right.
 - [schema-update-minimal-approach.md](schema-update-minimal-approach.md): the question-bank schema change that was implemented.
 - [refactor-schema.md](refactor-schema.md): the fuller redesign, the planned roles work and the deployment checklist. Read it before touching `questions_iaudit`.
+- [docs/database-management-progress.md](docs/database-management-progress.md): what is done and what remains in the four-week database management plan, with decisions and open client questions. Update it whenever a task is finished.
 
 ## Commands
 
@@ -68,7 +69,8 @@ php artisan storage:link                         # uploaded audit files 404 with
 ### Audit submission
 
 - `POST /api/answers` (`ApiController::submitAudit`) creates one `Audit` and one `AnswerIaudit` per answer in a single transaction. Files go to the `public` disk under `audits/{audit_id}/`.
-- Answers point at questions with `ON DELETE RESTRICT`. A question that has answers is retired (`is_active = false`), never deleted.
+- Answers point at questions with `ON DELETE RESTRICT`. A question that has answers is retired (`is_active = false`), never deleted. Deleting an unanswered question only hides it (`deleted_at`).
+- Each answer stores the wording it was given against (`answers_iaudit.question_text`). The PDF report matches on it first, so rewording a question never blanks past reports.
 
 ### PDF report
 

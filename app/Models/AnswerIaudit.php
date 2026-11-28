@@ -12,6 +12,7 @@ class AnswerIaudit extends Model
         'user_id',
         'ship_id',
         'question_id',
+        'question_text',
         'answer',
         'note',
         'files',
@@ -22,9 +23,10 @@ class AnswerIaudit extends Model
         'files' => 'array',
     ];
 
+    // withTrashed: a past audit still shows a question that was later deleted on screen.
     public function question()
     {
-        return $this->belongsTo(QuestionIaudit::class, 'question_id');
+        return $this->belongsTo(QuestionIaudit::class, 'question_id')->withTrashed();
     }
 
     public function user()

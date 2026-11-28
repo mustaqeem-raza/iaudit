@@ -23,9 +23,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
-        // The admin panel has no Tailwind, so links() uses Laravel's plain
-        // markup, styled by .pagination in public/css/admin.css.
-        Paginator::defaultView('pagination::default');
+        // The admin panel has no Tailwind, so links() uses the project's own
+        // plain view (resources/views/pagination.blade.php, styled by admin.css).
+        Paginator::defaultView('pagination');
         Paginator::defaultSimpleView('pagination::simple-default');
     }
 }

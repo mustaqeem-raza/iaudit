@@ -1,12 +1,5 @@
-{{-- Placeholder for a section that arrives in a later week. Text comes from config/coming-soon.php. --}}
-<x-app-layout>
-    <x-slot name="header">
-        <div>
-            <h1>{{ $title }}</h1>
-            <small>{{ $subtitle }}</small>
-        </div>
-    </x-slot>
-
+{{-- Placeholder for a section that arrives in a later week. Text comes from config/database-management.php. --}}
+<x-app-layout :title="$title" :subtitle="$subtitle">
     <section class="card stack">
         <div class="spread">
             <div>

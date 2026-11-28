@@ -6,19 +6,15 @@
         </p>
     </header>
 
-    {{-- The browser's own confirm box asks once more before the form is sent. --}}
+    {{-- data-confirm: the layout asks "Are you sure?" before the form is sent. --}}
     <form method="post" action="{{ route('profile.destroy') }}" class="stack"
-          onsubmit="return confirm('{{ __('Are you sure you want to delete your account?') }}');">
+          data-confirm="{{ __('Are you sure you want to delete your account?') }}">
         @csrf
         @method('delete')
 
-        <div class="field">
-            <label for="password">{{ __('Password') }}</label>
-            <input id="password" name="password" type="password" placeholder="{{ __('Password') }}" autocomplete="current-password">
-            @error('password', 'userDeletion')
-                <p class="err">{{ $message }}</p>
-            @enderror
-        </div>
+        <label class="field">{{ __('Password') }}
+            <input name="password" type="password" autocomplete="current-password">
+        </label>
 
         <div class="row">
             <button class="btn danger" type="submit">{{ __('Delete Account') }}</button>

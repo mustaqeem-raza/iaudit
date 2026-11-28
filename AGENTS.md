@@ -174,7 +174,7 @@ Three report views, three different levels of "dynamic":
 
 - No Node/Vite build and no JS libraries — plain Blade + `public/css/admin.css` (see `.claude/rules/frontend.md`).
 - Auth views under `resources/views/auth/` — Breeze forms rewritten in plain markup on `admin.css`.
-- Layouts: `layouts/app.blade.php` (authenticated shell: sidebar + teal header), `layouts/guest.blade.php` (auth pages), `layouts/navigation.blade.php` (left sidebar: Audits, Questions, Import & export, Versions, Audit trail, Access; unbuilt sections render `coming-soon.blade.php`).
+- Layouts: `layouts/app.blade.php` (authenticated shell: sidebar + teal header), `layouts/guest.blade.php` (auth pages), `layouts/navigation.blade.php` (left sidebar: Audits, then a "Database management" group with Overview, Questions, Import & export, Versions, Audit trail, Access; unbuilt sections render `coming-soon.blade.php` from `config/database-management.php`). Progress: `docs/database-management-progress.md`.
 - `audit-listing.blade.php` — the actual admin home screen: server-side search, status filter and pagination over all audits, with per-row View / PDF / Download buttons.
 - No admin panel package (Nova/Filament/etc.) — hand-rolled Breeze + Blade.
 

@@ -3,14 +3,11 @@
 namespace App\Imports;
 
 use App\Models\AnswerIaudit;
-use App\Models\CategoryIaudit;
 use App\Models\CriteriaIaudit;
-use App\Models\DepartmentIaudit;
-use App\Models\HeadingIaudit;
 use App\Models\QuestionIaudit;
 use App\Models\QuestionNcIaudit;
-use App\Models\SubHeadingIaudit;
 use App\Models\TextBoxIaudit;
+use App\Services\QuestionReferenceData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -28,9 +25,13 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
  * (and any answers_iaudit rows pointing at it) stay intact — a wipe-and
  * reinsert would hit the answers_iaudit.question_id FK (onDelete: restrict)
  * on any environment that already has submitted audits. After the sheet
- * is written, rows that disappeared from the workbook are removed only
- * when nothing references them; questions that still have answers are
- * soft-retired (`is_active = false`) instead. This never touches the 150
+ * is written, questions that disappeared from the workbook are deleted
+ * (hidden via deleted_at, see QuestionIaudit) when nothing references them;
+ * questions that still have answers are retired (`is_active = false`)
+ * instead. A deleted question that is back in the workbook is restored.
+ * Department, heading, subheading and category names and new question ids
+ * come from QuestionReferenceData, shared with the admin question form.
+ * This never touches the 150
  * legacy rows from the old workbook (template IS NULL, out of scope) or
  * any other template's rows. See retireOrRemoveStaleTemplateData().
  *
@@ -73,22 +74,17 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
     /** Questions dropped from the sheet but kept because submitted answers still point at them. */
     public int $retired = 0;
 
-    private ?int $nextQuestionId = null;
     private ?int $nextCriteriaId = null;
     private ?int $nextTextBoxId = null;
-    private ?int $nextHeadingId = null;
-    private ?int $nextSubheadingId = null;
-    private ?int $nextCategoryId = null;
-    private ?int $nextDepartmentId = null;
-
-    /** @var array<string,int> lookup-table name => id caches, populated lazily within one import run */
-    private array $headingIds = [];
-    private array $subheadingIds = [];
-    private array $categoryIds = [];
-    private array $departmentIds = [];
 
     /** @var array<string,array<string,true>> short_codes written this run, keyed by row_type */
     private array $seenCodes = ['question' => [], 'text' => [], 'criteria' => []];
+
+    /** One instance per import run, so its name caches and id counters span the whole sheet. */
+    public function __construct(
+        private QuestionReferenceData $references = new QuestionReferenceData(),
+    ) {
+    }
 
     public function collection(Collection $rows): void
     {
@@ -160,9 +156,9 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
 
     /**
      * After the sheet has been upserted, drop this template's rows that are
-     * no longer in the workbook. Questions that still have submitted answers
-     * cannot be deleted (answers_iaudit.question_id is ON DELETE RESTRICT),
-     * so those are soft-retired instead of blocking the whole import.
+     * no longer in the workbook. Questions without answers are deleted, which
+     * hides them (deleted_at) so their ids stay valid for cached mobile apps.
+     * Questions that still have submitted answers are retired instead.
      * Scoped strictly by `template` — legacy rows (template IS NULL) and
      * any other template are never touched.
      */
@@ -246,14 +242,14 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
             $this->warnings[] = "Row {$excelRow} ({$shortCode}): missing Department";
         }
 
-        $headingId = $title !== '' ? $this->getOrCreateHeadingId($title) : null;
+        $headingId = $title !== '' ? $this->references->headingId($title) : null;
 
         $attrs = [
             // Resolved against departments_iaudit (get-or-create by name,
             // same policy as heading/subheading/category below) — never the
             // sheet's raw department text. See the 2026_09_06 migration
             // that fixed the same issue for every row imported before this.
-            'department_id' => $department !== '' ? $this->getOrCreateDepartmentId($department) : null,
+            'department_id' => $department !== '' ? $this->references->departmentId($department) : null,
             'template'      => $this->templateName,
             'row_type'      => 'question',
             'text_icon'     => $this->nullable($row['text_icons'] ?? null),
@@ -261,23 +257,29 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
             'block_ref'     => $this->nullable($row['block_ref'] ?? null),
             'question_text' => $qtn !== '' ? $qtn : null,
             'heading_id'    => $headingId,
-            'subheading_id' => $heading !== '' ? $this->getOrCreateSubheadingId($heading, $headingId) : null,
-            'category_id'   => $category !== '' ? $this->getOrCreateCategoryId($category) : null,
+            'subheading_id' => $heading !== '' ? $this->references->subheadingId($heading, $headingId) : null,
+            'category_id'   => $category !== '' ? $this->references->categoryId($category) : null,
             'is_active'     => true,
             'imported_at'   => now(),
         ];
 
-        $existing = QuestionIaudit::where('template', $this->templateName)
+        // withTrashed: [template, short_code] is unique across deleted rows too.
+        $existing = QuestionIaudit::withTrashed()
+            ->where('template', $this->templateName)
             ->where('short_code', $shortCode)
             ->first();
 
         if ($existing) {
-            $existing->fill($attrs)->save();
+            // A question deleted on screen comes back while the workbook still
+            // has it: the workbook stays the master until Week 3's import preview.
+            $existing->fill($attrs);
+            $existing->deleted_at = null;
+            $existing->save();
             $question = $existing;
             $this->updated['question']++;
         } else {
             $question = QuestionIaudit::create(array_merge($attrs, [
-                'question_id' => $this->nextQuestionId(),
+                'question_id' => $this->references->nextQuestionId(),
                 'short_code'  => $shortCode,
             ]));
             $this->created['question']++;
@@ -375,104 +377,12 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
         $this->seenCodes['criteria'][$shortCode] = true;
     }
 
-    private function getOrCreateHeadingId(string $name): int
-    {
-        if (isset($this->headingIds[$name])) {
-            return $this->headingIds[$name];
-        }
-
-        $heading = HeadingIaudit::where('name', $name)->first();
-        if (! $heading) {
-            $heading = HeadingIaudit::create([
-                'heading_id' => $this->nextHeadingId(),
-                'name'       => $name,
-            ]);
-        }
-
-        return $this->headingIds[$name] = $heading->heading_id;
-    }
-
-    private function getOrCreateSubheadingId(string $name, ?int $headingId): int
-    {
-        $cacheKey = $headingId . '|' . $name;
-        if (isset($this->subheadingIds[$cacheKey])) {
-            return $this->subheadingIds[$cacheKey];
-        }
-
-        $subheading = SubHeadingIaudit::where('name', $name)
-            ->where('heading_id', $headingId)
-            ->first();
-
-        if (! $subheading) {
-            $subheading = SubHeadingIaudit::create([
-                'subheading_id' => $this->nextSubheadingId(),
-                'heading_id'    => $headingId,
-                'name'          => $name,
-            ]);
-        }
-
-        return $this->subheadingIds[$cacheKey] = $subheading->subheading_id;
-    }
-
-    private function getOrCreateCategoryId(string $name): int
-    {
-        if (isset($this->categoryIds[$name])) {
-            return $this->categoryIds[$name];
-        }
-
-        $category = CategoryIaudit::where('name', $name)->first();
-        if (! $category) {
-            $category = CategoryIaudit::create([
-                'category_id' => $this->nextCategoryId(),
-                'name'        => $name,
-            ]);
-        }
-
-        return $this->categoryIds[$name] = $category->category_id;
-    }
-
-    /**
-     * Resolves the sheet's `Departments` text to a real departments_iaudit
-     * row rather than storing it verbatim (that was the bug — every
-     * imported question used to carry its own copy of the department name
-     * instead of a foreign key, fixed retroactively for existing rows by
-     * the 2026_09_06 migration). Same get-or-create policy as
-     * heading/subheading/category above: this table's collation is
-     * case-insensitive, so a plain name match is enough to avoid creating
-     * near-duplicate rows from casing drift across import runs.
-     */
-    private function getOrCreateDepartmentId(string $name): int
-    {
-        if (isset($this->departmentIds[$name])) {
-            return $this->departmentIds[$name];
-        }
-
-        $department = DepartmentIaudit::where('name', $name)->first();
-        if (! $department) {
-            $department = DepartmentIaudit::create([
-                'department_id' => $this->nextDepartmentId(),
-                'name'          => $name,
-            ]);
-        }
-
-        return $this->departmentIds[$name] = $department->department_id;
-    }
-
     // --- Hand-assigned PK helpers -------------------------------------
-    // All of questions_iaudit/criteria_iaudit/text_boxes_iaudit/headings_
-    // iaudit/sub_headings_iaudit/categories_iaudit/departments_iaudit use
-    // hand-assigned (non-auto-increment) PKs. max()+1 is computed once per import run
-    // and incremented in PHP as rows are created within that run, to
-    // avoid a query per row and avoid two new rows in the same run
-    // colliding on the same next id. Not race-safe across concurrent
-    // imports — acceptable for Week 1's single-admin, ad-hoc usage.
-
-    private function nextQuestionId(): int
-    {
-        $this->nextQuestionId ??= (int) (QuestionIaudit::max('question_id') ?? 0);
-
-        return ++$this->nextQuestionId;
-    }
+    // criteria_iaudit and text_boxes_iaudit use hand-assigned keys. max()+1
+    // is computed once per import run and incremented in PHP, so there is no
+    // query per row and two rows created in one run cannot collide. Question,
+    // department, heading, subheading and category ids come from
+    // QuestionReferenceData, which works the same way.
 
     private function nextCriteriaId(): int
     {
@@ -486,34 +396,6 @@ class QuestionDataSheetImport implements ToCollection, WithHeadingRow
         $this->nextTextBoxId ??= (int) (TextBoxIaudit::max('text_box_id') ?? 0);
 
         return ++$this->nextTextBoxId;
-    }
-
-    private function nextHeadingId(): int
-    {
-        $this->nextHeadingId ??= (int) (HeadingIaudit::max('heading_id') ?? 0);
-
-        return ++$this->nextHeadingId;
-    }
-
-    private function nextSubheadingId(): int
-    {
-        $this->nextSubheadingId ??= (int) (SubHeadingIaudit::max('subheading_id') ?? 0);
-
-        return ++$this->nextSubheadingId;
-    }
-
-    private function nextCategoryId(): int
-    {
-        $this->nextCategoryId ??= (int) (CategoryIaudit::max('category_id') ?? 0);
-
-        return ++$this->nextCategoryId;
-    }
-
-    private function nextDepartmentId(): int
-    {
-        $this->nextDepartmentId ??= (int) (DepartmentIaudit::max('department_id') ?? 0);
-
-        return ++$this->nextDepartmentId;
     }
 
     /**

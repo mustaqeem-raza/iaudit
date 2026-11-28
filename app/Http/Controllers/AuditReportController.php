@@ -6,8 +6,6 @@ use App\Models\Audit;
 use App\Models\CrtTrapLocationIaudit;
 use App\Models\EfkIAudit;
 use App\Models\QuestionIaudit;
-use App\Models\Ship;
-use App\Models\User;
 use App\Services\QuestionHierarchyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -52,10 +50,8 @@ class AuditReportController extends Controller
         }
 
         $audits = $query->paginate(15)->withQueryString();
-        $users  = User::orderBy('first_name')->get(['id', 'first_name', 'last_name']);
-        $ships  = Ship::orderBy('name')->get(['id', 'name', 'mnemonic']);
 
-        return view('audit-listing', compact('audits', 'users', 'ships'));
+        return view('audit-listing', compact('audits'));
     }
 
     public function staticReport()
@@ -253,9 +249,12 @@ class AuditReportController extends Controller
             ]);
             return mb_strtolower(trim(preg_replace('/\s+/u', ' ', $s)));
         };
+        // Prefer the wording saved with the answer (answers_iaudit.question_text):
+        // a question reworded on screen afterwards must not blank this report.
+        $answeredText = fn($a) => $a->question_text ?? $a->question?->question_text;
         $answersByText = $audit->answers
-            ->filter(fn($a) => $a->question?->question_text)
-            ->keyBy(fn($a) => $normalize($a->question->question_text));
+            ->filter(fn($a) => $answeredText($a))
+            ->keyBy(fn($a) => $normalize($answeredText($a)));
 
         // `short_code` is a stable natural key on newly-imported questions
         // (nothing on legacy rows, so normalize()/$answersByText above stays

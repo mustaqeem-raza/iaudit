@@ -224,6 +224,9 @@ class ApiController extends Controller
                 'row_type'         => $q->row_type,
                 'template'         => $q->template,
                 'short_code'       => $q->short_code,
+                // Added in Week 1 of the database management module (additive).
+                'answer_options'   => $q->answer_options,
+                'priority'         => $q->priority,
             ];
         };
 
@@ -308,15 +311,23 @@ class ApiController extends Controller
                 'date_to'             => $validated['date_to'] ?? null,
             ]);
 
+            // The wording each answer was given against, loaded in one query,
+            // so rewording a question later never blanks this audit's PDF report.
+            // withTrashed: a phone may still answer a question deleted since it synced.
+            $questionTexts = QuestionIaudit::withTrashed()
+                ->whereIn('question_id', array_column($validated['answers'], 'question_id'))
+                ->pluck('question_text', 'question_id');
+
             foreach ($validated['answers'] as $index => $answerData) {
                 $answer = AnswerIaudit::create([
-                    'audit_id'    => $audit->id,
-                    'user_id'     => $user->id,
-                    'ship_id'     => $validated['ship_id'],
-                    'question_id' => $answerData['question_id'],
-                    'answer'      => $answerData['answer'],
-                    'note'        => $answerData['note'] ?? null,
-                    'files'       => null,
+                    'audit_id'      => $audit->id,
+                    'user_id'       => $user->id,
+                    'ship_id'       => $validated['ship_id'],
+                    'question_id'   => $answerData['question_id'],
+                    'question_text' => $questionTexts[$answerData['question_id']] ?? null,
+                    'answer'        => $answerData['answer'],
+                    'note'          => $answerData['note'] ?? null,
+                    'files'         => null,
                 ]);
 
                 $uploadedFiles = $request->file("answers.{$index}.files") ?? [];
